@@ -1,4 +1,5 @@
-import CA2D from './GOL'
+import CA2D from './models/CA2D'
+import './style.css'
 
 function App() {
   return (

@@ -1,10 +1,13 @@
-.GameOfLife {
+.P5Canvas {
     width: 100%;
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     background-color: white; 
+}
+
+#game-of-life-container {
     image-rendering: pixelated;
     image-rendering: crisp-edges;
 }

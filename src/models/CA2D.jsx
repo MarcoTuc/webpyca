@@ -1,9 +1,7 @@
-import './style.css'
-import { useEffect, useRef } from 'react';
-import p5 from 'p5';
-
+import P5Wrapper from "../components/P5Wrapper.jsx"
 
 function GameOfLife(p) {
+
     let frame_rate = 10;
     let canvas_width = 700;
     let canvas_height = 700;
@@ -113,25 +111,14 @@ function GameOfLife(p) {
         currentCells = nextCells;
         nextCells = temp;
     }
+
 }
 
 function CA2D() {
-    const p5ContainerRef = useRef();
-
-    useEffect(() => {
-        const p5Instance = new p5(GameOfLife, p5ContainerRef.current);
-
-        return () => {
-            p5Instance.remove();
-        }
-    }, []);
-
-    return (
-        <div 
-            className="GameOfLife" 
-            ref={p5ContainerRef}
-        />
-    );
+    return  <P5Wrapper 
+                id = "game-of-life-container"
+                sketch={GameOfLife}
+            />
 }
 
 export default CA2D;
