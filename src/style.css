@@ -4,6 +4,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: bisque;
+    background-color: white; 
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
 }
 

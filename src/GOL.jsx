@@ -9,7 +9,7 @@ function GameOfLife(p) {
     let canvas_height = 700;
     let columnCount;
     let rowCount;
-    let cellSize = 20;
+    let cellSize = 10;
     let currentCells = [];
     let nextCells = [];
 
@@ -41,8 +41,8 @@ function GameOfLife(p) {
             let cell = currentCells[column][row];
             // Convert cell value to get black (0) for alive or white (255 (white) for dead
             p.fill((1 - cell) * 255);
-            p.stroke(0);
-            p.rect(column * cellSize, row * cellSize, cellSize, cellSize);
+            p.noStroke()
+            p.square(column * cellSize, row * cellSize, cellSize);
           }
         }
       }
