@@ -4,7 +4,7 @@ import { loadPyodide } from "pyodide";
 function PyWrapper() {
 
     const [pyodideInstance, setPyodideInstance] = useState(null);
-    const [code, setCode] = useState("1+1");
+    const [code, setCode] = useState("import numpy as np\nnp.eye(3)");
     const [result, setResult] = useState([]);
     const [error, setError] = useState(null);
 
@@ -47,12 +47,14 @@ function PyWrapper() {
     const runCode = async () => {
         if (!pyodideInstance) return;
         try {
+
             setError(null);
             setResult([]);
             
             const res = await pyodideInstance.runPythonAsync(code);
             if (res !== undefined) {
-                setResult(prev => [...prev, String(res)]);
+                console.log(res.toJs())
+                setResult(prev => [...prev, res.toJs()]);
             }
         } catch (err) {
             setError(err.message);
@@ -86,9 +88,7 @@ function PyWrapper() {
                         padding: '10px',
                         borderRadius: '4px'
                     }}>
-                        {result.map((line, i) => (
-                            <div key={i}>{line}</div>
-                        ))}
+                        {result}
                     </pre>
                 )}
             </div>
