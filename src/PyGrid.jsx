@@ -16,12 +16,12 @@ np.random.rand(size, size)
 `
 
 
-function sketch(p) {
+function sketch(p, config) {
     
     let currentCells = [];
-    const canvasWidth = 600;
-    const canvasHeight = 600;
-    const cellSize = 1;
+    const canvasWidth = config.width;
+    const canvasHeight = config.height;
+    const cellSize = config.cellSize;
 
     p.setup = function() {
         p.createCanvas(canvasWidth, canvasHeight, p.P2D);
@@ -86,11 +86,17 @@ function PyGrid() {
     
     const [error, setError] = useState(null);
 
+    const [canvasConfig, setCanvasConfig] = useState({
+        width: 600,
+        height: 600,
+        cellSize: 1
+    });
+
     const initializeSketch = useCallback((p) => {
-        const instance = sketch(p);
+        const instance = sketch(p, canvasConfig);
         setP5Instance(instance);
         return instance;
-    }, []);
+    }, [canvasConfig]);
 
     // Load Pyodide once on component mount
     useEffect(() => {
