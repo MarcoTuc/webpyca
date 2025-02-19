@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { loadPyodide } from "pyodide";
+import Terminal from "./Terminal";
 
 function PyWrapper() {
 
@@ -7,10 +8,12 @@ function PyWrapper() {
     const [code, setCode] = useState("import numpy as np\nnp.eye(3)");
     const [result, setResult] = useState([]);
     const [error, setError] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         async function loadPy() {
             try {
+                setIsLoading(true);
                 const pyodide = await loadPyodide({
                     indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.2/full/"
                 });
@@ -36,9 +39,11 @@ function PyWrapper() {
                 const micropip = await pyodide.pyimport("micropip")
                 await micropip.install("numpy")
                 setPyodideInstance(pyodide);
+                setIsLoading(false);
             
             } catch (err) {
                 setError(`Failed to load Pyodide ${err}`);
+                setIsLoading(false);
             }
         }
         loadPy();
@@ -77,21 +82,15 @@ function PyWrapper() {
                     MozTabSize: 4
                 }}
             />
-            <button onClick={runCode}>Run Code</button>
+            <button onClick={runCode} disabled={isLoading || !pyodideInstance}>
+                Run Code
+            </button>
             
-            <div style={{ marginTop: '10px' }}>
-                {error ? (
-                    <p style={{ color: 'red' }}>Error: {error}</p>
-                ) : (
-                    <pre style={{ 
-                        backgroundColor: '#f5f5f5',
-                        padding: '10px',
-                        borderRadius: '4px'
-                    }}>
-                        {result}
-                    </pre>
-                )}
-            </div>
+            <Terminal 
+                isLoading={isLoading}
+                error={error}
+                result={result}
+            />
         </div>
     );
 }

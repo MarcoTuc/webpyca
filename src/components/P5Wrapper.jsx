@@ -1,8 +1,9 @@
 import { useRef, useEffect } from "react"
 import p5 from "p5"
 
-// Rename CA2D to P5Wrapper and accept sketch as a prop
+
 function P5Wrapper({ sketch, id }) {
+    
     const p5ContainerRef = useRef();
 
     useEffect(() => {
@@ -17,7 +18,7 @@ function P5Wrapper({ sketch, id }) {
         <div 
             className="P5Canvas" 
             id = {id}
-            ref={p5ContainerRef}
+            ref = {p5ContainerRef}
         />
     );
 }

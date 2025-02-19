@@ -1,14 +1,129 @@
-.P5Canvas {
-    width: 100%;
+/* Reset default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
+
+.ascii-play-container {
+    display: flex;
     height: 100vh;
+    background-color: #1e1e1e;
+    color: #fff;
+    font-family: 'Fira Code', monospace;
+}
+
+.left-panel {
+    flex: 1;
+    border-right: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+}
+
+.right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-section {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 20px;
+}
+
+.code-editor {
+    flex: 1;
+    background-color: #1e1e1e;
+    color: #fff;
+    border: none;
+    font-family: 'Fira Code', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 15px;
+    resize: none;
+    outline: none;
+}
+
+.controls {
+    padding: 10px 0;
+}
+
+.run-button {
+    background-color: transparent;
+    color: #fff;
+    border: 1px solid #666;
+    padding: 8px 16px;
+    font-family: 'Fira Code', monospace;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.run-button:hover:not(:disabled) {
+    background-color: #333;
+    border-color: #888;
+}
+
+.panel-header {
+    padding: 10px 20px;
+    border-bottom: 1px solid #333;
+    font-size: 14px;
+    color: #888;
+}
+
+.output-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#pygrid-container {
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: white; 
+    background-color: #1e1e1e;
 }
 
-#game-of-life-container {
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
+#pygrid-container canvas {
+    border: 1px solid #333;
+}
+
+.examples-section {
+    border-top: 1px solid #333;
+}
+
+.example-list {
+    padding: 10px 0;
+}
+
+.example-item {
+    padding: 8px 20px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.example-item:hover {
+    background-color: #333;
+}
+
+.error-message {
+    color: #ff6b6b;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+/* Adjust P5 canvas background */
+.P5Canvas {
+    background-color: #1e1e1e !important;
 }
 
