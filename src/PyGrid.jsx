@@ -1,12 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { loadPyodide } from "pyodide";
-import P5Wrapper from "./components/P5Wrapper";
 
-import AceEditor from "react-ace";
 import CodeMirror from "@uiw/react-codemirror"
 import { python } from '@codemirror/lang-python'
-import { okaidia } from '@uiw/codemirror-theme-okaidia';
 import { atomone } from '@uiw/codemirror-theme-atomone'
+
+import P5Wrapper from "./components/P5Wrapper";
 
 const initialImports =  
 `
@@ -113,9 +112,7 @@ function PyGrid() {
 
     // Load Pyodide once on component mount
     useEffect(() => {
-
         let mounted = true;
-
         async function loadPy() {
             try {
                 const pyodide = await loadPyodide({
@@ -145,18 +142,15 @@ function PyGrid() {
 
     useEffect(() => {
         let animationFrameId;
-
         const loop = () => {
             if (isRunning) {
                 runCode();
                 animationFrameId = requestAnimationFrame(loop);
             }
         };
-
         if (isRunning) {
             loop();
         }
-
         return () => {
             if (animationFrameId) {
                 cancelAnimationFrame(animationFrameId);
@@ -201,18 +195,6 @@ function PyGrid() {
             setError(err.message);
         }
     };
-
-    // const handleKeyDown = (e) => {
-    //     if (e.key === 'Tab') {
-    //         e.preventDefault();
-    //         const cursorPosition = e.target.selectionStart;
-    //         const newText = code.slice(0, cursorPosition) + '    ' + code.slice(cursorPosition);
-    //         setCode(newText);
-            
-    //         // Move cursor after the inserted tab
-    //         // e.target.setSelectionRange(cursorPosition + 4, cursorPosition + 4);
-    //     }
-    // };  
 
     return (
         <div className="ascii-play-container">
