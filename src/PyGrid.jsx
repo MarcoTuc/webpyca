@@ -14,23 +14,40 @@ import time
 
 `
 const initialCode = `
-size = 150
-np.random.rand(size, size)
+class Automaton():
+  def __init__(self, size):
+    self.grid = np.random.rand(size, size)
+
+  def draw(self):
+    self.grid = np.roll(self.grid, 1, axis = 0)
+    return self.grid
+
+
+auto = Automaton(200)
+
+def draw():
+  return auto.draw()
 
 `
 
 function sketch(p, config) {
     
     let currentCells = [];
-    const canvasWidth = config.width;
-    const canvasHeight = config.height;
-    const cellSize = config.cellSize;
+    let canvasWidth = config.width;
+    let canvasHeight = config.height;
+    let cellSize = config.cellSize;
 
     p.setup = function() {
         p.createCanvas(canvasWidth, canvasHeight, p.P2D);
         p.noLoop();
         p.pixelDensity(1);
         // p.noSmooth();
+    }
+
+    p.updateConfig = function(newConfig) {
+        canvasWidth = newConfig.width;
+        canvasHeight = newConfig.height;
+        cellSize = newConfig.cellSize;
     }
 
     p.draw = function() {
@@ -97,17 +114,20 @@ function PyGrid() {
         cellSize: 1
     });
 
+    const [storedCode, setStoredCode] = useState("");
+
+    useEffect(() => {
+        console.log(p5Instance)
+    }, [p5Instance])
+
     const initializeSketch = useCallback((p) => {
         const instance = sketch(p, canvasConfig);
         setP5Instance(instance);
         return instance;
-    }, [canvasConfig]);
+    }, []);
 
     function codeUpdater(newCode) {
-        console.log("Code changed")
-        setCode(newCode)
-        setCodeChanged(true)
-        console.log(`new flag ${codeChanged}`)
+        setCode(newCode);
     }
 
     // Load Pyodide once on component mount
@@ -164,35 +184,55 @@ function PyGrid() {
         try {
             setError(null);
             
-            const result = await pyodideInstance.runPythonAsync(code);
+            // Check if code has changed from stored version
+            if (code !== storedCode) {
+                // Run one step to get canvas size
+                await pyodideInstance.runPythonAsync(code);
+                
+                const hasDrawFunction = await pyodideInstance.runPythonAsync(`
+                    'draw' in globals() and callable(globals()['draw'])
+                `);
+                
+                if (!hasDrawFunction) {
+                    setError("No draw() function defined");
+                    return;
+                }
+
+                // Run one step to get dimensions
+                const result = await pyodideInstance.runPythonAsync("draw()");
+                const jsResult = result.toJs();
+                
+                if (Array.isArray(jsResult)) {       
+                    const receivedSize = jsResult.length;
+                    const newSize = canvasConfig.width / receivedSize;
+                    const newConfig = {
+                        ...canvasConfig,
+                        cellSize: newSize
+                    };
+                    setCanvasConfig(newConfig);
+                    p5Instance.updateConfig(newConfig);
+                    
+                    // Store the new code and reinitialize
+                    setStoredCode(code);
+                    await pyodideInstance.runPythonAsync(code);
+                } else {
+                    setError("draw() must return an array");
+                    return;
+                }
+            }
+            
+            // Normal execution
+            const result = await pyodideInstance.runPythonAsync("draw()");
             const jsResult = result.toJs();
             
             if (Array.isArray(jsResult)) {       
-                if (codeChanged) {
-                    // Temporarily stop the animation
-                    setIsRunning(false);
-                    
-                    const receivedSize = jsResult.length;
-                    const newSize = canvasConfig.width / receivedSize;
-                    setCanvasConfig(prev => ({
-                        ...prev,
-                        cellSize: newSize
-                    }));
-                    
-                    // Wait for next tick to ensure canvas is updated
-                    setTimeout(() => {
-                        setCodeChanged(false);
-                        setIsRunning(true);
-                    }, 0);
-                    
-                }
-
                 p5Instance.updateCells(jsResult);
             } else {
-                setError("Not an array");
+                setError("draw() must return an array");
             }
         } catch (err) {
             setError(err.message);
+            setIsRunning(false);
         }
     };
 
@@ -209,7 +249,15 @@ function PyGrid() {
                     <div className="controls-container">
                         <button 
                             className="run-button"
-                            onClick={() => setIsRunning(!isRunning)}
+                            onClick={() => {
+                                if (!isRunning) {
+                                    runCode().then(() => {
+                                        if (!error) setIsRunning(true);
+                                    });
+                                } else {
+                                    setIsRunning(false);
+                                }
+                            }}
                         >
                             {isRunning ? 'Stop' : 'Run'}
                         </button>
