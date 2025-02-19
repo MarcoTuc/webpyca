@@ -14,19 +14,39 @@ import time
 
 `
 const initialCode = `
-class Automaton():
-  def __init__(self, size):
-    self.grid = np.random.rand(size, size)
+import numpy as np
 
-  def draw(self):
-    self.grid = np.roll(self.grid, 1, axis = 0)
-    return self.grid
+class Automaton:
+    def __init__(self, size):
+        # Initialize with random binary state (0 or 1)
+        self.grid = np.random.choice([0, 1], size=(size, size), p=[0.85, 0.15])
+    
+    def draw(self):
+        # Calculate the number of live neighbors for each cell using convolution
+        kernel = np.array([[1, 1, 1],
+                          [1, 0, 1],
+                          [1, 1, 1]])
+        
+        # Count neighbors using convolution with periodic boundaries
+        neighbors = sum(
+            np.roll(np.roll(self.grid, i, 0), j, 1) * kernel[i+1, j+1]
+            for i in [-1, 0, 1]
+            for j in [-1, 0, 1]
+            if not (i == 0 and j == 0)
+        )
+        
+        # Apply Conway's Game of Life rules:
+        # 1. Live cell with 2 or 3 neighbors survives
+        # 2. Dead cell with exactly 3 neighbors becomes alive
+        # 3. All other cells die or stay dead
+        self.grid = ((neighbors == 3) | (self.grid & (neighbors == 2))).astype(int)
+        
+        return self.grid
 
-
-auto = Automaton(200)
+auto = Automaton(300)
 
 def main():
-  return auto.draw()
+    return auto.draw()
 
 `
 
@@ -190,7 +210,7 @@ function PyGrid() {
                 await pyodideInstance.runPythonAsync(code);
                 
                 const hasMainFunction = await pyodideInstance.runPythonAsync(`
-                    'draw' in globals() and callable(globals()['draw'])
+                    'main' in globals() and callable(globals()['main'])
                 `);
                 
                 if (!hasMainFunction) {
