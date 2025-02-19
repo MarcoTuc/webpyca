@@ -2,17 +2,16 @@ import { useEffect, useState, useCallback } from "react";
 import { loadPyodide } from "pyodide";
 import P5Wrapper from "./P5Wrapper";
 
+const initialImports =  `import numpy as np`
 const initialCode = `
-import numpy as np
-
 size = 150
-
 np.random.rand(size, size)
 
 `
 
 
 function sketch(p) {
+    
     let currentCells = [];
     const canvasWidth = 600;
     const canvasHeight = 600;
@@ -72,6 +71,7 @@ function PyGrid() {
     
     const [pyodideInstance, setPyodideInstance] = useState(null);
     const [code, setCode] = useState(initialCode);
+    const [imports, setImports] = useState(initialImports);
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [p5Instance, setP5Instance] = useState(null);
@@ -96,6 +96,8 @@ function PyGrid() {
                 await pyodide.loadPackage("micropip");
                 const micropip = await pyodide.pyimport("micropip");
                 await micropip.install("numpy");
+                // import standard packages when initializing the engine
+                await pyodide.runPython(initialImports)
                 
                 if (mounted) {
                     setPyodideInstance(pyodide);
