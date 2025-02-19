@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { loadPyodide } from "pyodide";
-import P5Wrapper from "./P5Wrapper";
+import P5Wrapper from "./components/P5Wrapper";
 
 const initialImports =  `import numpy as np`
 const initialCode = `
