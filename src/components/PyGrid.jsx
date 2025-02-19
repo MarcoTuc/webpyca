@@ -16,11 +16,12 @@ function sketch(p) {
     let currentCells = [];
     const canvasWidth = 600;
     const canvasHeight = 600;
-    const cellSize = 2;
+    const cellSize = 1;
 
     p.setup = function() {
-        p.createCanvas(canvasWidth, canvasHeight);
+        p.createCanvas(canvasWidth, canvasHeight, p.P2D);
         p.noLoop();
+        p.pixelDensity(1);
     }
 
     p.draw = function() {
@@ -30,20 +31,38 @@ function sketch(p) {
         const rowCount = currentCells.length;
         if (rowCount === 0) return;
         const colCount = currentCells[0].length;
+
+        p.loadPixels();
         
         for (let i = 0; i < rowCount; i++) {
             for (let j = 0; j < colCount; j++) {
                 const value = currentCells[i][j];
-                p.fill(255 * (1 - value));
-                p.noStroke();
-                p.rect(j * cellSize, i * cellSize, cellSize, cellSize);
+                const color = Math.floor(255 * (1 - value));
+                
+                const x = j * cellSize;
+                const y = i * cellSize;
+                
+                for (let dy = 0; dy < cellSize; dy++) {
+                    for (let dx = 0; dx < cellSize; dx++) {
+                        const idx = 4 * ((y + dy) * canvasWidth + (x + dx));
+                        p.pixels[idx] = color;     // R
+                        p.pixels[idx + 1] = color; // G
+                        p.pixels[idx + 2] = color; // B
+                        p.pixels[idx + 3] = 255;   // A
+                    }
+                }
             }
         }
+        
+        p.updatePixels();
     }
 
     p.updateCells = function(newCells) {
+        const start = performance.now();
         currentCells = newCells;
         p.redraw();
+        console.log(`P5 redraw time: ${(performance.now() - start).toFixed(2)}ms`);
+        console.log(`Projected FPS : ${(1000/(performance.now() - start)).toFixed(2)} FPS`);
     }
 
     return p;
@@ -97,13 +116,38 @@ function PyGrid() {
     const runCode = async () => {
         if (!pyodideInstance || !p5Instance) return;
         
+        const timings = {};
+        const mark = (label) => {
+            timings[label] = performance.now();
+        };
+        const measure = (start, end) => {
+            return `${(timings[end] - timings[start]).toFixed(2)}ms`;
+        };
+
         try {
             setError(null);
+            mark('start');
+            
+            mark('pythonExecution');
             const result = await pyodideInstance.runPythonAsync(code);
+            mark('pythonDone');
+            
+            mark('conversion');
             const jsResult = result.toJs();
+            mark('conversionDone');
             
             if (Array.isArray(jsResult)) {
+                mark('renderStart');
                 p5Instance.updateCells(jsResult);
+                mark('renderDone');
+                
+                // Log all timings
+                console.log({
+                    'Python Execution': measure('pythonExecution', 'pythonDone'),
+                    'Array Conversion': measure('conversion', 'conversionDone'),
+                    'Rendering': measure('renderStart', 'renderDone'),
+                    'Total Time': measure('start', 'renderDone')
+                });
             } else {
                 setError("Not an array");
             }
