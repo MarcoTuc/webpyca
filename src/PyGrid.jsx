@@ -1,8 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
 import { loadPyodide } from "pyodide";
 import P5Wrapper from "./components/P5Wrapper";
+import { Button } from "@mui/material";
 
-const initialImports =  `import numpy as np`
+const initialImports =  
+`
+import numpy as np
+import time
+
+`
 const initialCode = `
 size = 150
 np.random.rand(size, size)
@@ -70,11 +76,15 @@ function sketch(p) {
 function PyGrid() {
     
     const [pyodideInstance, setPyodideInstance] = useState(null);
-    const [code, setCode] = useState(initialCode);
-    const [imports, setImports] = useState(initialImports);
-    const [error, setError] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
     const [p5Instance, setP5Instance] = useState(null);
+    
+    const [isLoading, setIsLoading] = useState(true);
+    const [isRunning, setIsRunning] = useState(false);
+    
+    const [imports, setImports] = useState(initialImports);
+    const [code, setCode] = useState(initialCode);
+    
+    const [error, setError] = useState(null);
 
     const initializeSketch = useCallback((p) => {
         const instance = sketch(p);
@@ -97,7 +107,7 @@ function PyGrid() {
                 const micropip = await pyodide.pyimport("micropip");
                 await micropip.install("numpy");
                 // import standard packages when initializing the engine
-                await pyodide.runPython(initialImports)
+                await pyodide.runPython(imports)
                 
                 if (mounted) {
                     setPyodideInstance(pyodide);
@@ -114,6 +124,28 @@ function PyGrid() {
         loadPy();
         return () => { mounted = false; };
     }, []);
+
+    useEffect(() => {
+
+        let animationFrameId;
+
+        const loop = () => {
+            if (isRunning) {
+                runCode();
+                animationFrameId = requestAnimationFrame(loop);
+            }
+        };
+
+        if (isRunning) {
+            loop();
+        }
+
+        return () => {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+        };
+    }, [isRunning]);
 
     const runCode = async () => {
         if (!pyodideInstance || !p5Instance) return;
@@ -170,13 +202,13 @@ function PyGrid() {
                         rows={20}
                     />
                     <div className="controls">
-                        <button 
-                            className="run-button"
-                            onClick={runCode} 
-                            disabled={isLoading || !pyodideInstance}
+                        <Button 
+                            onClick={() => setIsRunning(!isRunning)}
+                            variant="contained" 
+                            color="primary"
                         >
-                            {isLoading ? <span style={{color: '#ff6b6b'}}>Loading</span> : 'Run'}
-                        </button>
+                            {isRunning ? 'Stop' : 'Run'}
+                        </Button>
                         {error && <div className="error-message">{error}</div>}
                     </div>
                 </div>
