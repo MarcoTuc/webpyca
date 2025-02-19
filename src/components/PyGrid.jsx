@@ -2,11 +2,21 @@ import { useEffect, useState, useCallback } from "react";
 import { loadPyodide } from "pyodide";
 import P5Wrapper from "./P5Wrapper";
 
+const initialCode = `
+import numpy as np
+
+size = 150
+
+np.random.rand(size, size)
+
+`
+
+
 function sketch(p) {
     let currentCells = [];
-    const canvasWidth = 700;
-    const canvasHeight = 700;
-    const cellSize = 5;
+    const canvasWidth = 600;
+    const canvasHeight = 600;
+    const cellSize = 2;
 
     p.setup = function() {
         p.createCanvas(canvasWidth, canvasHeight);
@@ -42,7 +52,7 @@ function sketch(p) {
 function PyGrid() {
     
     const [pyodideInstance, setPyodideInstance] = useState(null);
-    const [code, setCode] = useState("import numpy as np\nnp.eye(3)");
+    const [code, setCode] = useState(initialCode);
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [p5Instance, setP5Instance] = useState(null);
@@ -119,7 +129,7 @@ function PyGrid() {
                             onClick={runCode} 
                             disabled={isLoading || !pyodideInstance}
                         >
-                            Run
+                            {isLoading ? <span style={{color: '#ff6b6b'}}>Loading</span> : 'Run'}
                         </button>
                         {error && <div className="error-message">{error}</div>}
                     </div>
@@ -132,15 +142,6 @@ function PyGrid() {
                         sketch={initializeSketch}
                         id="pygrid-container"
                     />
-                </div>
-                <div className="examples-section">
-                    <div className="panel-header">Examples</div>
-                    <div className="example-list">
-                        <div className="example-item">Simple output</div>
-                        <div className="example-item">Coordinates: x, y</div>
-                        <div className="example-item">How to draw a circle</div>
-                        <div className="example-item">How to draw a square</div>
-                    </div>
                 </div>
             </div>
         </div>

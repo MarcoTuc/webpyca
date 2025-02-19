@@ -39,6 +39,7 @@ body, html {
     flex-direction: column;
     height: 100%;
     padding: 20px;
+    position: relative;
 }
 
 .code-editor {
@@ -50,11 +51,17 @@ body, html {
     font-size: 14px;
     line-height: 1.6;
     padding: 15px;
+    padding-bottom: 60px; /* Make room for controls */
     resize: none;
     outline: none;
 }
 
 .controls {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background-color: #1e1e1e;
     padding: 10px 0;
 }
 
@@ -109,7 +116,7 @@ body, html {
 .example-item {
     padding: 8px 20px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    /* transition: background-color 0.2s; */
 }
 
 .example-item:hover {
