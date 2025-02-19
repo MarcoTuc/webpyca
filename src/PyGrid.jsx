@@ -25,7 +25,7 @@ class Automaton():
 
 auto = Automaton(200)
 
-def draw():
+def main():
   return auto.draw()
 
 `
@@ -189,17 +189,17 @@ function PyGrid() {
                 // Run one step to get canvas size
                 await pyodideInstance.runPythonAsync(code);
                 
-                const hasDrawFunction = await pyodideInstance.runPythonAsync(`
+                const hasMainFunction = await pyodideInstance.runPythonAsync(`
                     'draw' in globals() and callable(globals()['draw'])
                 `);
                 
-                if (!hasDrawFunction) {
-                    setError("No draw() function defined");
+                if (!hasMainFunction) {
+                    setError("No main() function defined");
                     return;
                 }
 
                 // Run one step to get dimensions
-                const result = await pyodideInstance.runPythonAsync("draw()");
+                const result = await pyodideInstance.runPythonAsync("main()");
                 const jsResult = result.toJs();
                 
                 if (Array.isArray(jsResult)) {       
@@ -216,19 +216,19 @@ function PyGrid() {
                     setStoredCode(code);
                     await pyodideInstance.runPythonAsync(code);
                 } else {
-                    setError("draw() must return an array");
+                    setError("main() must return an array");
                     return;
                 }
             }
             
             // Normal execution
-            const result = await pyodideInstance.runPythonAsync("draw()");
+            const result = await pyodideInstance.runPythonAsync("main()");
             const jsResult = result.toJs();
             
             if (Array.isArray(jsResult)) {       
                 p5Instance.updateCells(jsResult);
             } else {
-                setError("draw() must return an array");
+                setError("main() must return an array");
             }
         } catch (err) {
             setError(err.message);
