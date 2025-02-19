@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
+
+
 /* Reset default styles */
 * {
     margin: 0;
@@ -11,7 +14,6 @@ body, html {
     overflow: hidden;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
 
 .ascii-play-container {
     display: flex;
@@ -56,28 +58,49 @@ body, html {
     outline: none;
 }
 
-.controls {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    right: 20px;
+.controls-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     background-color: #1e1e1e;
-    padding: 10px 0;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.button-container {
+    flex-shrink: 0;
+}
+
+.error-container {
+    flex: 1;
+    min-width: 0; /* Allows proper text wrapping */
+}
+
+.error-message {
+    color: #ff6b6b;
+    font-size: 14px;
+    word-wrap: break-word;
+    margin-top: 14px;
 }
 
 .run-button {
-    background-color: transparent;
+    background-color: #1e1e1e;
     color: #fff;
-    border: 1px solid #666;
+    border: 1px solid #fff;
     padding: 8px 16px;
     font-family: 'Fira Code', monospace;
     cursor: pointer;
-    transition: all 0.3s;
+    /* transition: all 0.3s; */
+    border-radius: 0;
 }
 
 .run-button:hover:not(:disabled) {
     background-color: #333;
-    border-color: #888;
+    border-color: #fff;
 }
 
 .panel-header {
@@ -99,6 +122,8 @@ body, html {
     justify-content: center;
     align-items: center;
     background-color: #1e1e1e;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
 }
 
 #pygrid-container canvas {
@@ -123,14 +148,23 @@ body, html {
     background-color: #333;
 }
 
-.error-message {
-    color: #ff6b6b;
-    margin-top: 10px;
-    font-size: 14px;
-}
-
 /* Adjust P5 canvas background */
 .P5Canvas {
     background-color: #1e1e1e !important;
 }
 
+.cm-editor {
+    background-color: #1e1e1e !important;
+}
+
+.cm-editor .cm-content {
+    background-color: #1e1e1e !important;
+}
+
+.cm-editor .cm-gutters {
+    background-color: #1e1e1e !important;
+}
+
+.cm-editor .cm-content ::selection {
+    background-color: #264f78 !important;
+}

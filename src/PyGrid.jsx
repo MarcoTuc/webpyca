@@ -1,7 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
 import { loadPyodide } from "pyodide";
 import P5Wrapper from "./components/P5Wrapper";
-import { Button } from "@mui/material";
+
+import AceEditor from "react-ace";
+import CodeMirror from "@uiw/react-codemirror"
+import { python } from '@codemirror/lang-python'
+import { okaidia } from '@uiw/codemirror-theme-okaidia';
+import { atomone } from '@uiw/codemirror-theme-atomone'
 
 const initialImports =  
 `
@@ -15,7 +20,6 @@ np.random.rand(size, size)
 
 `
 
-
 function sketch(p, config) {
     
     let currentCells = [];
@@ -27,10 +31,11 @@ function sketch(p, config) {
         p.createCanvas(canvasWidth, canvasHeight, p.P2D);
         p.noLoop();
         p.pixelDensity(1);
+        // p.noSmooth();
     }
 
     p.draw = function() {
-        p.background(255);
+        p.background('#1e1e1e');
         if (!Array.isArray(currentCells)) return;
         
         const rowCount = currentCells.length;
@@ -66,8 +71,8 @@ function sketch(p, config) {
         const start = performance.now();
         currentCells = newCells;
         p.redraw();
-        console.log(`P5 redraw time: ${(performance.now() - start).toFixed(2)}ms`);
-        console.log(`Projected FPS : ${(1000/(performance.now() - start)).toFixed(2)} FPS`);
+        // console.log(`P5 redraw time: ${(performance.now() - start).toFixed(2)}ms`);
+        // console.log(`Projected FPS : ${(1000/(performance.now() - start)).toFixed(2)} FPS`);
     }
 
     return p;
@@ -84,6 +89,7 @@ function PyGrid() {
     const [imports, setImports] = useState(initialImports);
     const [code, setCode] = useState(initialCode);
     
+    const [codeChanged, setCodeChanged] = useState(true);
     const [error, setError] = useState(null);
 
     const [canvasConfig, setCanvasConfig] = useState({
@@ -97,6 +103,13 @@ function PyGrid() {
         setP5Instance(instance);
         return instance;
     }, [canvasConfig]);
+
+    function codeUpdater(newCode) {
+        console.log("Code changed")
+        setCode(newCode)
+        setCodeChanged(true)
+        console.log(`new flag ${codeChanged}`)
+    }
 
     // Load Pyodide once on component mount
     useEffect(() => {
@@ -126,13 +139,11 @@ function PyGrid() {
                 }
             }
         }
-
         loadPy();
         return () => { mounted = false; };
     }, []);
 
     useEffect(() => {
-
         let animationFrameId;
 
         const loop = () => {
@@ -156,38 +167,33 @@ function PyGrid() {
     const runCode = async () => {
         if (!pyodideInstance || !p5Instance) return;
         
-        const timings = {};
-        const mark = (label) => {
-            timings[label] = performance.now();
-        };
-        const measure = (start, end) => {
-            return `${(timings[end] - timings[start]).toFixed(2)}ms`;
-        };
-
         try {
             setError(null);
-            mark('start');
             
-            mark('pythonExecution');
             const result = await pyodideInstance.runPythonAsync(code);
-            mark('pythonDone');
-            
-            mark('conversion');
             const jsResult = result.toJs();
-            mark('conversionDone');
             
-            if (Array.isArray(jsResult)) {
-                mark('renderStart');
+            if (Array.isArray(jsResult)) {       
+                if (codeChanged) {
+                    // Temporarily stop the animation
+                    setIsRunning(false);
+                    
+                    const receivedSize = jsResult.length;
+                    const newSize = canvasConfig.width / receivedSize;
+                    setCanvasConfig(prev => ({
+                        ...prev,
+                        cellSize: newSize
+                    }));
+                    
+                    // Wait for next tick to ensure canvas is updated
+                    setTimeout(() => {
+                        setCodeChanged(false);
+                        setIsRunning(true);
+                    }, 0);
+                    
+                }
+
                 p5Instance.updateCells(jsResult);
-                mark('renderDone');
-                
-                // Log all timings
-                console.log({
-                    'Python Execution': measure('pythonExecution', 'pythonDone'),
-                    'Array Conversion': measure('conversion', 'conversionDone'),
-                    'Rendering': measure('renderStart', 'renderDone'),
-                    'Total Time': measure('start', 'renderDone')
-                });
             } else {
                 setError("Not an array");
             }
@@ -196,32 +202,41 @@ function PyGrid() {
         }
     };
 
+    // const handleKeyDown = (e) => {
+    //     if (e.key === 'Tab') {
+    //         e.preventDefault();
+    //         const cursorPosition = e.target.selectionStart;
+    //         const newText = code.slice(0, cursorPosition) + '    ' + code.slice(cursorPosition);
+    //         setCode(newText);
+            
+    //         // Move cursor after the inserted tab
+    //         // e.target.setSelectionRange(cursorPosition + 4, cursorPosition + 4);
+    //     }
+    // };  
+
     return (
         <div className="ascii-play-container">
             <div className="left-panel">
                 <div className="editor-section">
-                    <textarea
-                        className="code-editor"
+                    <CodeMirror
                         value={code}
-                        onChange={(e) => setCode(e.target.value)}
-                        placeholder="Enter Python code here"
-                        rows={20}
+                        onChange={codeUpdater}
+                        theme={atomone}
+                        extensions={[python()]}
                     />
-                    <div className="controls">
-                        <Button 
+                    <div className="controls-container">
+                        <button 
+                            className="run-button"
                             onClick={() => setIsRunning(!isRunning)}
-                            variant="contained" 
-                            color="primary"
                         >
                             {isRunning ? 'Stop' : 'Run'}
-                        </Button>
-                        {error && <div className="error-message">{error}</div>}
+                        </button>
                     </div>
+                    {error && <div className="error-message">{error}</div>}
                 </div>
             </div>
             <div className="right-panel">
                 <div className="output-section">
-                    <div className="panel-header">Output</div>
                     <P5Wrapper 
                         sketch={initializeSketch}
                         id="pygrid-container"
