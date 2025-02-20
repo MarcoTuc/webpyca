@@ -344,8 +344,11 @@ function PyGrid({ themes }) {
                             foldGutter: false
                         }}
                     />
-                    <ThemeToggle />
+                    {error && <div className="error-message">{error}</div>}
+                </div>
                     <div className="controls-container">
+                        <div id="separatrix" />
+                        <ThemeToggle />
                         <button 
                             className={`run-button ${isLoading ? 'loading' : ''}`}
                             onClick={handleRunClick}
@@ -355,8 +358,6 @@ function PyGrid({ themes }) {
                         </button>
                         
                     </div>
-                    {error && <div className="error-message">{error}</div>}
-                </div>
             </div>
             <div className="right-panel">
                 <div className="output-section">

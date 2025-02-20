@@ -54,7 +54,7 @@ body, html {
 .left-panel {
     flex: 1;  /* Takes up 50% of the space */
     position: relative;
-    border-right: 1px solid #bdbdbd;
+    /* border-right: 1px solid #bdbdbd; */
     display: flex;
     flex-direction: column;
 }
@@ -63,7 +63,7 @@ body, html {
     flex: 1;  /* Takes up 50% of the space */
     position: relative;
     display: flex;
-    flex-direction: column;
+    flex-direction: column;    
 }
 
 .editor-section {
@@ -72,6 +72,13 @@ body, html {
     height: 100%;
     padding: 20px;
     position: relative;
+    height: 100vh;
+    overflow: auto;
+    direction: rtl;
+}
+
+.editor-section > * {
+    direction: ltr;
 }
 
 .code-editor {
@@ -84,20 +91,21 @@ body, html {
     line-height: 1.6;
     padding: 15px;
     padding-bottom: 60px;
-    resize: none;
-    outline: none;
+    overflow: auto;
 }
 
 .controls-container {
     position: absolute;
-    top: 50%;
+    top: 8%;
     right: 0;
     transform: translate(50%, -50%);
     background-color: transparent;
     padding: 0;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 8px;
     z-index: 1000;
 }
 
@@ -117,6 +125,15 @@ body, html {
     margin-top: 14px;
 }
 
+#separatrix {
+    background-color: var(--border-color);
+    height: 100vh;
+    width: 3px;
+    position: absolute;
+    top: 0;
+    margin: 0;
+}
+
 .run-button {
     background-color: var(--bg-color);
     color: var(--text-color);
@@ -126,6 +143,10 @@ body, html {
     font-size: 12px;
     cursor: pointer;
     border-radius: 0;
+    position: relative;
+    top: 50px;
+    width: 40px;
+    text-align: center;
 }
 
 .run-button:hover:not(:disabled) {
@@ -211,10 +232,6 @@ body, html {
 }
 
 .theme-toggle {
-    position: absolute;
-    top: 10px;
-    left: 100%;
-    transform: translateX(-50%);
     width: 25px;
     height: 25px;
     border-radius: 50%;
@@ -226,7 +243,6 @@ body, html {
     z-index: 1000;
     display: flex;
     align-items: center;
-    justify-content: center;
 }
 
 .theme-toggle:hover {
