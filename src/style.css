@@ -1,11 +1,31 @@
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
 
+:root[data-theme="dark"] {
+    --bg-color: #1e1e1e;
+    --text-color: #fff;
+    --border-color: #333;
+    --hover-color: #333;
+    --selection-color: #264f78;
+    --header-color: #888;
+}
+
+:root[data-theme="light"] {
+    --bg-color: #ffffff;
+    --text-color: #000;
+    --border-color: #ddd;
+    --hover-color: #f0f0f0;
+    --selection-color: #add6ff;
+    --header-color: #666;
+}
 
 /* Reset default styles */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    transition: background-color 0.3s ease, 
+                color 0.3s ease, 
+                border-color 0.3s ease;
 }
 
 body, html {
@@ -18,14 +38,14 @@ body, html {
 .ascii-play-container {
     display: flex;
     height: 100vh;
-    background-color: #1e1e1e;
-    color: #fff;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     font-family: 'Fira Code', monospace;
 }
 
 .left-panel {
     flex: 1;
-    border-right: 1px solid #333;
+    border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
 }
@@ -46,14 +66,14 @@ body, html {
 
 .code-editor {
     flex: 1;
-    background-color: #1e1e1e;
-    color: #fff;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     border: none;
     font-family: 'Fira Code', monospace;
     font-size: 14px;
     line-height: 1.6;
     padding: 15px;
-    padding-bottom: 60px; /* Make room for controls */
+    padding-bottom: 60px;
     resize: none;
     outline: none;
 }
@@ -63,7 +83,7 @@ body, html {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: #1e1e1e;
+    background-color: var(--bg-color);
     padding: 10px;
     display: flex;
     justify-content: center;
@@ -88,26 +108,26 @@ body, html {
 }
 
 .run-button {
-    background-color: #1e1e1e;
-    color: #fff;
-    border: 1px solid #fff;
-    padding: 8px 16px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
+    padding: 4px 6px;
     font-family: 'Fira Code', monospace;
+    font-size: 12px;
     cursor: pointer;
-    /* transition: all 0.3s; */
     border-radius: 0;
 }
 
 .run-button:hover:not(:disabled) {
-    background-color: #333;
-    border-color: #fff;
+    background-color: var(--hover-color);
+    border-color: var(--text-color);
 }
 
 .panel-header {
     padding: 10px 20px;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--border-color);
     font-size: 14px;
-    color: #888;
+    color: var(--header-color);
 }
 
 .output-section {
@@ -121,17 +141,17 @@ body, html {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #1e1e1e;
+    background-color: var(--bg-color);
     image-rendering: pixelated;
     image-rendering: crisp-edges;
 }
 
 #pygrid-container canvas {
-    border: 1px solid #333;
+    border: 1px solid var(--border-color);
 }
 
 .examples-section {
-    border-top: 1px solid #333;
+    border-top: 1px solid var(--border-color);
 }
 
 .example-list {
@@ -145,26 +165,54 @@ body, html {
 }
 
 .example-item:hover {
-    background-color: #333;
+    background-color: var(--hover-color);
 }
 
 /* Adjust P5 canvas background */
 .P5Canvas {
-    background-color: #1e1e1e !important;
+    background-color: var(--bg-color) !important;
 }
 
 .cm-editor {
-    background-color: #1e1e1e !important;
+    background-color: var(--bg-color) !important;
 }
 
 .cm-editor .cm-content {
-    background-color: #1e1e1e !important;
+    background-color: var(--bg-color) !important;
 }
 
 .cm-editor .cm-gutters {
-    background-color: #1e1e1e !important;
+    background-color: var(--bg-color) !important;
 }
 
 .cm-editor .cm-content ::selection {
-    background-color: #264f78 !important;
+    background-color: var(--selection-color) !important;
+}
+
+.theme-toggle {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
+    padding: 6px;
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle:hover {
+    background-color: var(--hover-color);
+}
+
+.theme-toggle svg {
+    width: 16px;
+    height: 16px;
 }
