@@ -14,12 +14,15 @@ import time
 
 `
 const initialCode = `
+
 import numpy as np
 
 class Automaton:
     def __init__(self, size):
         # Initialize with random binary state (0 or 1)
         self.grid = np.random.choice([0, 1], size=(size, size), p=[0.85, 0.15])
+        self.radius = 5
+        self.density =  0.6
     
     def draw(self):
         # Calculate the number of live neighbors for each cell using convolution
@@ -42,12 +45,32 @@ class Automaton:
         self.grid = ((neighbors == 3) | (self.grid & (neighbors == 2))).astype(int)
         
         return self.grid
+      
+    def spray(self, x, y):
+        # Define the square region bounds with periodic boundary handling
+        size = self.grid.shape[0]
+        r = self.radius
+        
+        # Create random spray pattern
+        spray_pattern = np.random.random((2*r + 1, 2*r + 1)) < self.density
+        
+        # Apply spray pattern with periodic boundaries
+        for i in range(-r, r+1):
+            for j in range(-r, r+1):
+                if spray_pattern[i+r, j+r]:
+                    # Use modulo for periodic boundaries
+                    new_x = (x + i) % size
+                    new_y = (y + j) % size
+                    self.grid[new_x, new_y] = 1
 
 auto = Automaton(300)
 
 def main():
     return auto.draw()
 
+def spray(x, y):
+    auto.spray(x, y)
+    
 `
 
 function sketch(p, config, pyodideInstance) {
@@ -90,12 +113,12 @@ function sketch(p, config, pyodideInstance) {
                 
                 try {
                     pyodideInstance.runPython(`
-                        if 'handle_mouse' in globals() and callable(handle_mouse):
-                            handle_mouse(${mouseY}, ${mouseX})
+                        if 'spray' in globals() and callable(spray):
+                            spray(${mouseY}, ${mouseX})
                     `);
                     console.log(mouseX, mouseY)
                 } catch (err) {
-                    console.error("Failed to call handle_mouse:", err);
+                    console.error("Failed to call spray:", err);
                 }
             }
         }
