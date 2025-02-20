@@ -6,6 +6,7 @@ import { python } from '@codemirror/lang-python'
 
 import P5Wrapper from "./components/P5Wrapper";
 import { useTheme } from './components/ThemeProvider';
+import ThemeToggle from "./components/ThemeToggle";
 
 const initialImports =  
 `
@@ -343,6 +344,7 @@ function PyGrid({ themes }) {
                             foldGutter: false
                         }}
                     />
+                    <ThemeToggle />
                     <div className="controls-container">
                         <button 
                             className={`run-button ${isLoading ? 'loading' : ''}`}
@@ -351,6 +353,7 @@ function PyGrid({ themes }) {
                         >
                             {isLoading ? 'Loading...' : isRunning ? 'Stop' : 'Run'}
                         </button>
+                        
                     </div>
                     {error && <div className="error-message">{error}</div>}
                 </div>

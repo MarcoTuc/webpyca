@@ -43,21 +43,25 @@ body, html {
 
 .ascii-play-container {
     display: flex;
+    width: 100%;
     height: 100vh;
+    position: relative;
     background-color: var(--bg-color);
     color: var(--text-color);
     font-family: 'Fira Code', monospace;
 }
 
 .left-panel {
-    flex: 1;
-    border-right: 1px solid var(--border-color);
+    flex: 1;  /* Takes up 50% of the space */
+    position: relative;
+    border-right: 1px solid #bdbdbd;
     display: flex;
     flex-direction: column;
 }
 
 .right-panel {
-    flex: 1;
+    flex: 1;  /* Takes up 50% of the space */
+    position: relative;
     display: flex;
     flex-direction: column;
 }
@@ -85,10 +89,10 @@ body, html {
 }
 
 .controls-container {
-    position: fixed;
+    position: absolute;
     top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    right: 0;
+    transform: translate(50%, -50%);
     background-color: transparent;
     padding: 0;
     display: flex;
@@ -207,9 +211,9 @@ body, html {
 }
 
 .theme-toggle {
-    position: fixed;
+    position: absolute;
     top: 10px;
-    left: 50%;
+    left: 100%;
     transform: translateX(-50%);
     width: 25px;
     height: 25px;
