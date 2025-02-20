@@ -15,13 +15,15 @@ import time
 `
 const initialCode = `
 
+
+
 import numpy as np
 
 class Automaton:
     def __init__(self, size):
         # Initialize with random binary state (0 or 1)
         self.grid = np.random.choice([0, 1], size=(size, size), p=[0.85, 0.15])
-        self.radius = 5
+        self.radius = 12
         self.density =  0.6
     
     def draw(self):
@@ -51,8 +53,12 @@ class Automaton:
         size = self.grid.shape[0]
         r = self.radius
         
-        # Create random spray pattern
-        spray_pattern = np.random.random((2*r + 1, 2*r + 1)) < self.density
+        # Create a grid of coordinates relative to center
+        y_coords, x_coords = np.ogrid[-r:r+1, -r:r+1]
+        # Calculate distances from center for each point
+        distances = np.sqrt(x_coords**2 + y_coords**2)
+        # Create circular mask with random density
+        spray_pattern = (distances <= r) & (np.random.random((2*r + 1, 2*r + 1)) < self.density)
         
         # Apply spray pattern with periodic boundaries
         for i in range(-r, r+1):
@@ -70,7 +76,8 @@ def main():
 
 def spray(x, y):
     auto.spray(x, y)
-    
+
+
 `
 
 function sketch(p, config, pyodideInstance) {
