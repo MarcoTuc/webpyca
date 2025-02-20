@@ -50,7 +50,7 @@ def main():
 
 `
 
-function sketch(p, config) {
+function sketch(p, config, pyodideInstance) {
     
     let currentCells = [];
     let canvasWidth = config.width;
@@ -84,7 +84,20 @@ function sketch(p, config) {
             p.mouseY >= 0 && p.mouseY < canvasHeight) {
             const mouseX = Math.floor(p.mouseX / cellSize);
             const mouseY = Math.floor(p.mouseY / cellSize);
-            console.log(`Mouse at position: (${mouseX}, ${mouseY})`);
+            
+            // Call the Python handle_mouse function if it exists
+            if (pyodideInstance) {
+                
+                try {
+                    pyodideInstance.runPython(`
+                        if 'handle_mouse' in globals() and callable(handle_mouse):
+                            handle_mouse(${mouseY}, ${mouseX})
+                    `);
+                    console.log(mouseX, mouseY)
+                } catch (err) {
+                    console.error("Failed to call handle_mouse:", err);
+                }
+            }
         }
     }
 
@@ -145,7 +158,7 @@ function PyGrid({ themes }) {
     const [imports, setImports] = useState(initialImports);
     const [code, setCode] = useState(initialCode);
     
-    const [codeChanged, setCodeChanged] = useState(true);
+    // const [codeChanged, setCodeChanged] = useState(true);
     const [error, setError] = useState(null);
 
     const [canvasConfig, setCanvasConfig] = useState({
@@ -161,10 +174,10 @@ function PyGrid({ themes }) {
     // }, [p5Instance])
 
     const initializeSketch = useCallback((p) => {
-        const instance = sketch(p, canvasConfig);
+        const instance = sketch(p, canvasConfig, pyodideInstance);
         setP5Instance(instance);
         return instance;
-    }, []);
+    }, [pyodideInstance, canvasConfig]);
 
     function codeUpdater(newCode) {
         setCode(newCode);
