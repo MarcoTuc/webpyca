@@ -7,6 +7,7 @@
     --hover-color: #333;
     --selection-color: #264f78;
     --header-color: #888;
+    --active-line-color: #282828;
 }
 
 :root[data-theme="light"] {
@@ -14,8 +15,15 @@
     --text-color: #000;
     --border-color: #ddd;
     --hover-color: #f0f0f0;
-    --selection-color: #add6ff;
+    --selection-color: #e8e8e8;
     --header-color: #666;
+    --active-line-color: #f4f4f4;
+}
+
+:root {
+    --transition-duration: 0.15s;
+    --transition-timing: ease;
+    transition: all var(--transition-duration) var(--transition-timing);
 }
 
 /* Reset default styles */
@@ -23,9 +31,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    transition: background-color 0.3s ease, 
-                color 0.3s ease, 
-                border-color 0.3s ease;
+    transition: all var(--transition-duration) var(--transition-timing) !important;
 }
 
 body, html {
@@ -173,7 +179,6 @@ body, html {
 .example-item {
     padding: 8px 20px;
     cursor: pointer;
-    /* transition: background-color 0.2s; */
 }
 
 .example-item:hover {
@@ -186,7 +191,7 @@ body, html {
 }
 
 .cm-editor {
-    background-color: var(--bg-color) !important;
+    transition: all var(--transition-duration) var(--transition-timing) !important;
 }
 
 .cm-editor .cm-content {
@@ -227,4 +232,21 @@ body, html {
 .theme-toggle svg {
     width: 16px;
     height: 16px;
+}
+
+/* Remove the focus outline in CodeMirror */
+.cm-editor.cm-focused {
+    outline: none !important;
+}
+
+.cm-editor .cm-activeLine {
+    background-color: var(--active-line-color) !important;
+}
+
+/* Update CodeMirror transitions */
+.cm-editor,
+.cm-editor *,
+.cm-editor .cm-content,
+.cm-editor .cm-gutters {
+    transition: all var(--transition-duration) var(--transition-timing) !important;
 }

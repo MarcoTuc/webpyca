@@ -3,9 +3,9 @@ import { loadPyodide } from "pyodide";
 
 import CodeMirror from "@uiw/react-codemirror"
 import { python } from '@codemirror/lang-python'
-import { atomone } from '@uiw/codemirror-theme-atomone'
 
 import P5Wrapper from "./components/P5Wrapper";
+import { useTheme } from './components/ThemeProvider';
 
 const initialImports =  
 `
@@ -114,8 +114,8 @@ function sketch(p, config) {
     return p;
 }
 
-function PyGrid() {
-    
+function PyGrid({ themes }) {
+    const { theme } = useTheme();
     const [pyodideInstance, setPyodideInstance] = useState(null);
     const [p5Instance, setP5Instance] = useState(null);
     
@@ -263,8 +263,12 @@ function PyGrid() {
                     <CodeMirror
                         value={code}
                         onChange={codeUpdater}
-                        theme={atomone}
+                        theme={themes[theme]}
                         extensions={[python()]}
+                        basicSetup={{
+                            lineNumbers: false,
+                            foldGutter: false
+                        }}
                     />
                     <div className="controls-container">
                         <button 
