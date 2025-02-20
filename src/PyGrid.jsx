@@ -70,16 +70,36 @@ function sketch(p, config) {
         cellSize = newConfig.cellSize;
     }
 
+    p.mousePressed = function() {
+        handleMouse();
+    }
+
+    p.mouseDragged = function() {
+        handleMouse();
+    }
+
+    function handleMouse() {
+        // Only register mouse input if coordinates are within canvas
+        if (p.mouseX >= 0 && p.mouseX < canvasWidth && 
+            p.mouseY >= 0 && p.mouseY < canvasHeight) {
+            const mouseX = Math.floor(p.mouseX / cellSize);
+            const mouseY = Math.floor(p.mouseY / cellSize);
+            console.log(`Mouse at position: (${mouseX}, ${mouseY})`);
+        }
+    }
+
     p.draw = function() {
+
         p.background('#1e1e1e');
-        if (!Array.isArray(currentCells)) return;
         
+        if (!Array.isArray(currentCells)) return;
         const rowCount = currentCells.length;
+    
         if (rowCount === 0) return;
         const colCount = currentCells[0].length;
 
         p.loadPixels();
-        
+    
         for (let i = 0; i < rowCount; i++) {
             for (let j = 0; j < colCount; j++) {
                 const value = currentCells[i][j];
@@ -136,9 +156,9 @@ function PyGrid({ themes }) {
 
     const [storedCode, setStoredCode] = useState("");
 
-    useEffect(() => {
-        console.log(p5Instance)
-    }, [p5Instance])
+    // useEffect(() => {
+    //     console.log(p5Instance)
+    // }, [p5Instance])
 
     const initializeSketch = useCallback((p) => {
         const instance = sketch(p, canvasConfig);
@@ -256,6 +276,16 @@ function PyGrid({ themes }) {
         }
     };
 
+    const handleRunClick = (e) => {
+        if (!isRunning) {
+            runCode().then(() => {
+                if (!error) setIsRunning(true);
+            });
+        } else {
+            setIsRunning(false);
+        }
+    };
+
     return (
         <div className="ascii-play-container">
             <div className="left-panel">
@@ -273,15 +303,7 @@ function PyGrid({ themes }) {
                     <div className="controls-container">
                         <button 
                             className={`run-button ${isLoading ? 'loading' : ''}`}
-                            onClick={() => {
-                                if (!isRunning) {
-                                    runCode().then(() => {
-                                        if (!error) setIsRunning(true);
-                                    });
-                                } else {
-                                    setIsRunning(false);
-                                }
-                            }}
+                            onClick={handleRunClick}
                             disabled={isLoading}
                         >
                             {isLoading ? 'Loading...' : isRunning ? 'Stop' : 'Run'}
