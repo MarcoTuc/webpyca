@@ -83,8 +83,8 @@ body, html {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: var(--bg-color);
-    padding: 10px;
+    background-color: transparent;
+    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -121,6 +121,18 @@ body, html {
 .run-button:hover:not(:disabled) {
     background-color: var(--hover-color);
     border-color: var(--text-color);
+}
+
+.run-button.loading {
+    background-color: #ff6868;
+    cursor: not-allowed;
+    border: 1px solid var(--text-color);
+    padding: 5px 7px;
+    color: white;
+}
+
+.run-button:disabled {
+    cursor: not-allowed;
 }
 
 .panel-header {

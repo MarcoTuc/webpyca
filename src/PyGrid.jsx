@@ -268,7 +268,7 @@ function PyGrid() {
                     />
                     <div className="controls-container">
                         <button 
-                            className="run-button"
+                            className={`run-button ${isLoading ? 'loading' : ''}`}
                             onClick={() => {
                                 if (!isRunning) {
                                     runCode().then(() => {
@@ -278,8 +278,9 @@ function PyGrid() {
                                     setIsRunning(false);
                                 }
                             }}
+                            disabled={isLoading}
                         >
-                            {isRunning ? 'Stop' : 'Run'}
+                            {isLoading ? 'Loading...' : isRunning ? 'Stop' : 'Run'}
                         </button>
                     </div>
                     {error && <div className="error-message">{error}</div>}
