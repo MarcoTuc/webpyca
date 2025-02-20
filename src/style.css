@@ -43,20 +43,25 @@ body, html {
 
 .ascii-play-container {
     display: flex;
-    width: 100%;
+    width: 100vw;
     height: 100vh;
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
     background-color: var(--bg-color);
     color: var(--text-color);
     font-family: 'Fira Code', monospace;
+    overflow: hidden;
 }
 
 .left-panel {
     flex: 1;  /* Takes up 50% of the space */
     position: relative;
-    /* border-right: 1px solid #bdbdbd; */
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .right-panel {
@@ -64,15 +69,17 @@ body, html {
     position: relative;
     display: flex;
     flex-direction: column;    
+    min-width: 0;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .editor-section {
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding: 20px;
+    padding-left: 20px;
     position: relative;
-    height: 100vh;
     overflow: auto;
     direction: rtl;
 }
@@ -94,25 +101,6 @@ body, html {
     overflow: auto;
 }
 
-.controls-container {
-    position: absolute;
-    top: 8%;
-    right: 0;
-    transform: translate(50%, -50%);
-    background-color: transparent;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    z-index: 1000;
-}
-
-.button-container {
-    flex-shrink: 0;
-}
-
 .error-container {
     flex: 1;
     min-width: 0; /* Allows proper text wrapping */
@@ -124,6 +112,25 @@ body, html {
     word-wrap: break-word;
     margin-top: 14px;
 }
+
+/* #################################### */
+/* CENTRAL SEPARATRIX CONTROLS SECTION */
+
+.controls-container {
+    position: fixed;
+    left: 50%;
+    top: 3%;
+    transform: translate(-50%);
+    background-color: transparent;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    z-index: 1000;
+}
+
 
 #separatrix {
     background-color: var(--border-color);
@@ -166,71 +173,6 @@ body, html {
     cursor: not-allowed;
 }
 
-.panel-header {
-    padding: 10px 20px;
-    border-bottom: 1px solid var(--border-color);
-    font-size: 14px;
-    color: var(--header-color);
-}
-
-.output-section {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-#pygrid-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: var(--bg-color);
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-}
-
-#pygrid-container canvas {
-    border: 1px solid var(--border-color);
-}
-
-.examples-section {
-    border-top: 1px solid var(--border-color);
-}
-
-.example-list {
-    padding: 10px 0;
-}
-
-.example-item {
-    padding: 8px 20px;
-    cursor: pointer;
-}
-
-.example-item:hover {
-    background-color: var(--hover-color);
-}
-
-/* Adjust P5 canvas background */
-.P5Canvas {
-    background-color: var(--bg-color) !important;
-}
-
-.cm-editor {
-    transition: all var(--transition-duration) var(--transition-timing) !important;
-}
-
-.cm-editor .cm-content {
-    background-color: var(--bg-color) !important;
-}
-
-.cm-editor .cm-gutters {
-    background-color: var(--bg-color) !important;
-}
-
-.cm-editor .cm-content ::selection {
-    background-color: var(--selection-color) !important;
-}
-
 .theme-toggle {
     width: 25px;
     height: 25px;
@@ -252,6 +194,70 @@ body, html {
 .theme-toggle svg {
     width: 16px;
     height: 16px;
+}
+
+/* #################################### */
+/* OUTPUT PANEL FOR P5 VISUALIZED ARRAY */
+
+.output-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#pygrid-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--bg-color);
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    overflow: hidden;
+}
+
+
+#pygrid-container canvas {
+    border: 1px solid var(--border-color);
+}
+
+.examples-section {
+    border-top: 1px solid var(--border-color);
+}
+
+/* .example-list {
+    padding: 10px 0;
+}
+
+.example-item {
+    padding: 8px 20px;
+    cursor: pointer;
+}
+
+.example-item:hover {
+    background-color: var(--hover-color);
+} */
+
+/* Adjust P5 canvas background */
+.P5Canvas {
+    background-color: var(--bg-color) !important;
+}
+
+.cm-editor {
+    transition: all var(--transition-duration) var(--transition-timing) !important;
+}
+
+.cm-editor .cm-content {
+    background-color: var(--bg-color) !important;
+}
+
+.cm-editor .cm-gutters {
+    background-color: var(--bg-color) !important;
+}
+
+.cm-editor .cm-content ::selection {
+    background-color: var(--selection-color) !important;
 }
 
 /* Remove the focus outline in CodeMirror */
