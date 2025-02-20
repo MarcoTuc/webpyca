@@ -88,11 +88,18 @@ function sketch(p, config, pyodideInstance) {
     let canvasHeight = config.height;
     let cellSize = config.cellSize;
 
+    let cam;
+    let delta = 0.001;
+
     p.setup = function() {
         p.createCanvas(canvasWidth, canvasHeight, p.P2D);
         p.noLoop();
         p.pixelDensity(1);
-        // p.noSmooth();
+        p.noSmooth();
+
+        // cam = p.createCamera();
+        // cam.setPosition(0,-300,300)
+        // cam.lookAt(0,0,0)
     }
 
     p.updateConfig = function(newConfig) {
