@@ -69,7 +69,14 @@ class Automaton:
     def __init__(self, size):
         self.size = size
         # Initialize with random state between 0 and 1
-        self.grid = np.random.uniform(0, 1, size=(size, size)) * np.random.choice([0, 1], size=(size, size), p=[0.9, 0.1])
+        self.grid = np.random.uniform(
+            0, 1, 
+            size=(size, size)
+        ) * np.random.choice(
+            [0, 1], 
+            size=(size, size), 
+            p=[0.9, 0.1]
+        )
         self.radius = 12
         self.density = 0.6
         
@@ -114,7 +121,9 @@ class Automaton:
         potential = np.real(np.fft.ifft2(fft_grid * self.kernel_fft))
         
         # Update grid using vectorized operations
-        self.grid = np.clip(self.grid + self.dt * self._growth_function(potential), 0, 1)
+        self.grid = np.clip(
+            self.grid + self.dt * self._growth_function(potential), 0, 1
+        )
         return self.grid
     
     def spray(self, x, y):
@@ -124,14 +133,17 @@ class Automaton:
         # Create mask using broadcasting
         i, j = np.ogrid[-r:r+1, -r:r+1]
         distances = np.sqrt(i**2 + j**2)
-        spray_pattern = (distances <= r) & (np.random.random((2*r + 1, 2*r + 1)) < self.density)
+        spray_pattern = (distances <= r) & (np.random.random(
+                                            (2*r + 1, 2*r + 1)) < self.density)
         
         # Calculate indices with periodic boundaries
         x_indices = (x + i) % self.size
         y_indices = (y + j) % self.size
         
         # Update grid in one operation
-        self.grid[x_indices, y_indices] = np.where(spray_pattern, 1, self.grid[x_indices, y_indices])
+        self.grid[x_indices, y_indices] = np.where(
+            spray_pattern, 1, self.grid[x_indices, y_indices]
+        )
 
 auto = Automaton(300)
 
@@ -141,6 +153,128 @@ def main():
 def spray(x, y):
   auto.spray(x, y)
 
+    
+    
+    `,
+    multilenia:
+    `
+#### TWEAK THESE PARAMETERS
+
+world_size = 250
+number_hidden_channels = 10
+
+brush_radius = 50
+brush_density = 0.9
+
+R = 15
+dt = 0.2
+power_T = 0.1
+power_sigma = 0.3
+
+#### If you have any idea of how to make this faster
+#### by just using numpy, you are more than welcome
+#### marco.tuccio95@gmail.com
+
+class Automaton:
+    
+    def __init__(self):
+        self.size = world_size
+        self.channels = 3 + number_hidden_channels
+        # Add hidden channels (3 RGB + 2 hidden)
+        self.grid = np.zeros((self.size, self.size, self.channels), dtype=np.float32)
+        
+        # Initialize both visible and hidden channels
+        center = self.size // 2
+        radius = self.size // 4
+        # mask = np.random.choice([0, 1], size=(radius*2, radius*2), p=[0.9, 0.1])
+        # self.grid[center-radius:center+radius, center-radius:center+radius] = (
+        #    np.random.uniform(0, 1, size=(radius*2, radius*2, self.channels)) * mask[:, :, None]
+        #)
+        
+        self.brush_radius = brush_radius
+        self.brush_density = brush_density
+        
+        # Simplified Lenia parameters
+        self.dt = dt
+        self.R = R  # Reduced kernel size
+        
+        # Pre-compute kernel and its FFT
+        self._initialize_kernel()
+        
+        # Extend parameters for hidden channels
+        self.T = np.random.power(power_T, size=self.channels)
+        self.sigma = np.random.power(power_sigma, size=self.channels)
+
+
+    def _initialize_kernel(self):
+        # Smaller, simpler kernel
+        x = np.linspace(-self.R, self.R, 2*self.R + 1)
+        xx, yy = np.meshgrid(x, x)
+        dists = np.sqrt(xx**2 + yy**2) / self.R
+        
+        # Simplified kernel function
+        kernel = np.exp(-((dists - 0.5) ** 2) / 0.045)
+        kernel[dists > 1] = 0
+        kernel = kernel / np.sum(kernel)
+        
+        # Pad kernel
+        kernel_size = 2 * self.R + 1
+        padded = np.zeros((self.size, self.size), dtype=np.float32)
+        start = (self.size - kernel_size) // 2
+        padded[start:start+kernel_size, start:start+kernel_size] = kernel
+        
+        # Pre-compute FFT of kernel
+        self.kernel_fft = np.fft.rfft2(np.fft.fftshift(padded))[:, :self.size//2 + 1]
+    
+    def _growth_function(self, x):
+        # Simplified growth function
+        return np.maximum(0, 1 - (x - self.T[None, None, :])**2 / (self.sigma[None, None, :])) * 2 - 1
+    
+    def draw(self):
+        # Process all channels including hidden ones
+        fft_grid = np.fft.rfft2(self.grid, axes=(0, 1))
+        potential = np.fft.irfft2(
+            fft_grid * self.kernel_fft[..., None], 
+            s=(self.size, self.size), 
+            axes=(0, 1)
+        )
+        
+        # Update all channels
+        self.grid += self.dt * self._growth_function(potential)
+        np.clip(self.grid, 0, 1, out=self.grid)
+        
+        # Return only the RGB channels for display
+        return self.grid[:, :, :3]
+    
+    def spray(self, x, y):
+        # Define the radius
+        r = self.brush_radius
+        
+        # Create a circular mask with random dots
+        i, j = np.ogrid[-r:r+1, -r:r+1]
+        distances = np.sqrt(i**2 + j**2)
+        spray_pattern = (distances <= r) & (np.random.random((2*r + 1, 2*r + 1)) < self.brush_density)
+        
+        # Calculate indices with periodic boundaries
+        x_indices = (x + i) % self.size
+        y_indices = (y + j) % self.size
+        
+        # Update grid only where spray_pattern is True
+        mask = spray_pattern[..., None]  # Add channel dimension
+        random_values = np.random.uniform(0.5, 1, self.channels)
+        self.grid[x_indices, y_indices] = np.where(
+            mask, random_values, self.grid[x_indices, y_indices]
+        )
+        
+auto = Automaton()
+
+def main():
+    return auto.draw()
+
+def spray(x, y):
+    auto.spray(x, y)
+    
+    
     `
 }
 

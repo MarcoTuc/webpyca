@@ -8,6 +8,7 @@ function AutomatonSelect({ value, onChange }) {
             onChange={(e) => onChange(e.target.value)}
         >
             <option value="lenia">Lenia</option>
+            <option value="multilenia">RGB Lenia</option>
             <option value="gol">Game of Life</option>
         </select>
     );

@@ -20,7 +20,7 @@ import time
 `
 const initialCode = saved_automata.lenia
 
-function sketch(p, config, pyodideInstance, theme) {
+function sketch(p, config, pyodideInstance, theme, isRGB) {
     
     let grid = {
         cells: [],
@@ -125,6 +125,10 @@ function sketch(p, config, pyodideInstance, theme) {
         theme = newTheme
     }
 
+    p.updateRGB = function(newRGB) {
+        isRGB = newRGB
+    }
+
     p.draw = function() {
 
         const lightBg = { r: 0xF8, g: 0xF6, b: 0xF1 };  // #F8F6F1
@@ -134,6 +138,9 @@ function sketch(p, config, pyodideInstance, theme) {
         const rowCount = grid.cells.length;
         if (rowCount === 0) return;
         const colCount = grid.cells[0].length;
+
+        // console.log("Value type:", typeof grid.cells[0][0], 
+                    // grid.cells[0][0] instanceof Float64Array ? "Float32Array" : "number")
 
         // Clear the entire canvas with the appropriate background color
         p.loadPixels();
@@ -152,20 +159,30 @@ function sketch(p, config, pyodideInstance, theme) {
         const endX = Math.min(colCount, Math.ceil((grid.width - grid.x) / scaledCellSize));
         const endY = Math.min(rowCount, Math.ceil((grid.height - grid.y) / scaledCellSize));
 
+
         for (let i = startY; i < endY; i++) {
-            for (let j = startX; j < endX; j++) {
-                const value = grid.cells[i][j];
-                // Interpolate between light and dark background colors
-                const r = theme === 'dark' 
-                    ? Math.floor(value * 255 + (1 - value) * darkBg.r)
-                    : Math.floor(value * darkBg.r + (1 - value) * lightBg.r);
-                const g = theme === 'dark'
-                    ? Math.floor(value * 255 + (1 - value) * darkBg.g)
-                    : Math.floor(value * darkBg.g + (1 - value) * lightBg.g);
-                const b = theme === 'dark'
-                    ? Math.floor(value * 255 + (1 - value) * darkBg.b)
-                    : Math.floor(value * darkBg.b + (1 - value) * lightBg.b);
+            for (let j = startX; j < endX; j++) {        
                 
+                const cell = grid.cells[i][j];
+
+                // Get base RGB values
+                const baser = Math.floor(isRGB ? cell[0] * 255 : cell * 255);
+                const baseg = Math.floor(isRGB ? cell[1] * 255 : cell * 255);
+                const baseb = Math.floor(isRGB ? cell[2] * 255 : cell * 255);
+
+                let r, g, b;
+                if (theme === 'light') {
+                    // In light theme, pinch white to lightBg
+                    r = Math.min(255 - baser, lightBg.r);
+                    g = Math.min(255 - baseg, lightBg.g);
+                    b = Math.min(255 - baseb, lightBg.b);
+                } else {
+                    // In dark theme, pinch black to darkBg
+                    r = Math.max(baser, darkBg.r);
+                    g = Math.max(baseg, darkBg.g);
+                    b = Math.max(baseb, darkBg.b);
+                }
+               
                 // Calculate screen coordinates
                 const screenX = Math.floor(j * scaledCellSize + grid.x);
                 const screenY = Math.floor(i * scaledCellSize + grid.y);
@@ -227,19 +244,27 @@ function PyGrid({ themes }) {
     const [storedCode, setStoredCode] = useState("");
 
     const [FPS, setFPS] = useState(30)
+    const [isRGB, setIsRGB] = useState(false)
 
     const initializeSketch = useCallback((p) => {
-        const instance = sketch(p, canvasConfig, pyodideInstance, theme);
+        const instance = sketch(p, canvasConfig, pyodideInstance, theme, isRGB);
         setP5Instance(instance);
         return instance;
     }, [pyodideInstance, canvasConfig]);
 
+    
     useEffect(() => {
         if (p5Instance) {
             p5Instance.updateTheme(theme)
             p5Instance.redraw()
         }
     }, [theme])
+
+    useEffect(() => {
+        if (p5Instance) {
+            p5Instance.updateRGB(isRGB)
+        }
+    }, [isRGB])
 
     function codeUpdater(newCode) {
         setCode(newCode);
@@ -257,7 +282,6 @@ function PyGrid({ themes }) {
                 await pyodide.loadPackage("micropip");
                 const micropip = await pyodide.pyimport("micropip");
                 await micropip.install("numpy");
-                await micropip.install("autograd")
                 // import standard packages when initializing the engine
                 await pyodide.runPython(imports)
                 
@@ -293,7 +317,6 @@ function PyGrid({ themes }) {
     }, [isRunning, FPS]);
 
     const runCode = async () => {
-
         if (!pyodideInstance || !p5Instance) return;
         
         try {
@@ -327,6 +350,12 @@ function PyGrid({ themes }) {
                     };
                     setCanvasConfig(newConfig);
                     p5Instance.updateConfig(newConfig);
+
+                    if (typeof jsResult[0][0] === 'number') {
+                        setIsRGB(false)
+                    } else {
+                        setIsRGB(true)
+                    }
                     
                     // Store the new code and reinitialize
                     setStoredCode(code);
@@ -337,13 +366,27 @@ function PyGrid({ themes }) {
                 }
             }
             
-            // Normal execution
+            // Timing measurements
+            const pythonStart = performance.now();
             const result = await pyodideInstance.runPythonAsync("main()");
+            const pythonEnd = performance.now();
+            
+            const conversionStart = performance.now();
             const jsResult = result.toJs();
+            const conversionEnd = performance.now();
             
             if (Array.isArray(jsResult)) {       
-                console.log("received array from Python")   
+                const renderStart = performance.now();
                 p5Instance.updateCells(jsResult);
+                const renderEnd = performance.now();
+                
+                // Log timing results
+                console.log(`---------------------------------------------`)
+                console.log(`Python computation: ${(pythonEnd - pythonStart).toFixed(2)}ms`);
+                console.log(`Array conversion: ${(conversionEnd - conversionStart).toFixed(2)}ms`);
+                console.log(`Rendering: ${(renderEnd - renderStart).toFixed(2)}ms`);
+                console.log(`Total: ${(renderEnd - pythonStart).toFixed(2)}ms`);
+                
             } else {
                 setError("main() must return an array");
             }
