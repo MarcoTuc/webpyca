@@ -145,6 +145,7 @@ function sketch(p, config, pyodideInstance, theme) {
     }
 
     p.draw = function() {
+
         const lightBg = { r: 0xF8, g: 0xF6, b: 0xF1 };  // #F8F6F1
         const darkBg = { r: 0x1E, g: 0x1E, b: 0x1E };  // #1E1E1E
 
@@ -294,7 +295,7 @@ function PyGrid({ themes }) {
         const loop = () => {
             if (isRunning) {
                 runCode();
-                animationFrameId = requestAnimationFrame(loop);
+                animationFrameId = requestAnimationFrame(loop);                
             }
         };
         if (isRunning) {
@@ -308,6 +309,7 @@ function PyGrid({ themes }) {
     }, [isRunning]);
 
     const runCode = async () => {
+
         if (!pyodideInstance || !p5Instance) return;
         
         try {
