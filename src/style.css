@@ -206,6 +206,7 @@ body, html {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: relative;
 }
 
 #pygrid-container {
@@ -217,12 +218,23 @@ body, html {
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     overflow: hidden;
+    position: relative;
 }
 
+/* Add this new class */
+.P5Canvas {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+}
 
-/* #pygrid-container canvas {
-    border: 1px solid var(--border-color);
-} */
+/* Add this to ensure the canvas itself fills the container */
+.P5Canvas canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
 
 .examples-section {
     border-top: 1px solid var(--border-color);
