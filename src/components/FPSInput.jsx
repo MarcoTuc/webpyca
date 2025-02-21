@@ -1,15 +1,19 @@
 import React from "react";
 
 function FPSInput({ onChange }) {
+    const handleChange = (e) => {
+        onChange(parseInt(e.target.value));
+    };
+
     return (
         <input
             type="number"
             min="1"
-            max="120"
+            max="60"
             defaultValue="10"
-            onBlur={(e) => onChange(parseInt(e.target.value))}
+            onBlur={handleChange}
             onKeyDown={(e) => {
-                if (e.key === "Enter") {
+                if (e.key === 'Enter') {
                     e.target.blur();
                 }
             }}

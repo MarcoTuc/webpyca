@@ -163,6 +163,7 @@ body, html {
 }
 
 .run-button.loading {
+    width: fit-content;
     background-color: #ff6868;
     cursor: not-allowed;
     border: 1px solid var(--text-color);
