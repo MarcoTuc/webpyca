@@ -63,7 +63,8 @@ def spray(x, y):
 
     lenia: 
     `
-    class Automaton:
+    
+class Automaton:
     def __init__(self, size):
         self.size = size
         # Initialize with random state between 0 and 1
@@ -134,10 +135,11 @@ def spray(x, y):
 auto = Automaton(300)
 
 def main():
-    return auto.draw()
+  return auto.draw()
 
 def spray(x, y):
-    auto.spray(x, y)
+  auto.spray(x, y)
+
     `
 }
 
