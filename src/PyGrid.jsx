@@ -370,6 +370,16 @@ function PyGrid({ themes }) {
 
     return (
         <div className="ascii-play-container">
+            
+            <div className="right-panel">
+                <div className="output-section">
+                    <P5Wrapper 
+                        sketch={initializeSketch}
+                        id="pygrid-container"
+                    />
+                </div>
+            </div>
+
             <div className="left-panel">
                 <div className="editor-section">
                     <CodeMirror
@@ -404,14 +414,7 @@ function PyGrid({ themes }) {
                         />
                     </div>
             </div>
-            <div className="right-panel">
-                <div className="output-section">
-                    <P5Wrapper 
-                        sketch={initializeSketch}
-                        id="pygrid-container"
-                    />
-                </div>
-            </div>
+
         </div>
     );
 }

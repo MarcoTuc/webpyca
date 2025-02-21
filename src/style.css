@@ -83,7 +83,7 @@ body, html {
     padding-top: 20px;
     position: relative;
     overflow: auto;
-    direction: rtl;
+    /* direction: rtl; */
 }
 
 .editor-section > * {
@@ -327,12 +327,14 @@ body, html {
     font-family: 'Space Mono', monospace;
     font-size: 12px;
     position: relative;
-    top: 70vh;
+    top: 80vh;
     width: 80px;
+    transform: translate(-5vw);
     text-align: center;
     cursor: pointer;
     appearance: none;
     border-radius: 0;
+    width: fit-content;
     outline: none;
 }
 
