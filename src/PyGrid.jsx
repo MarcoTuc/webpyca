@@ -153,7 +153,15 @@ function sketch(p, config, pyodideInstance, theme) {
         if (rowCount === 0) return;
         const colCount = grid.cells[0].length;
 
+        // Clear the entire canvas with the appropriate background color
         p.loadPixels();
+        const bg = theme === 'dark' ? darkBg : lightBg;
+        for (let i = 0; i < p.pixels.length; i += 4) {
+            p.pixels[i] = bg.r;        // R
+            p.pixels[i + 1] = bg.g;    // G
+            p.pixels[i + 2] = bg.b;    // B
+            p.pixels[i + 3] = 255;     // A
+        }
         
         // Calculate the visible region of the grid
         const scaledCellSize = grid.cellSize * grid.scale;
