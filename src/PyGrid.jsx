@@ -257,6 +257,7 @@ function PyGrid({ themes }) {
                 await pyodide.loadPackage("micropip");
                 const micropip = await pyodide.pyimport("micropip");
                 await micropip.install("numpy");
+                await micropip.install("autograd")
                 // import standard packages when initializing the engine
                 await pyodide.runPython(imports)
                 
@@ -372,13 +373,16 @@ function PyGrid({ themes }) {
             <div className="left-panel">
                 <div className="editor-section">
                     <CodeMirror
+                        className="codemirror-editor"
                         value={code}
                         onChange={codeUpdater}
                         theme={themes[theme]}
                         extensions={[python()]}
                         basicSetup={{
                             lineNumbers: false,
-                            foldGutter: false
+                            foldGutter: false,
+                            indentUnit: 4,
+                            tabSize: 4
                         }}
                     />
                     {error && <div className="error-message">{error}</div>}

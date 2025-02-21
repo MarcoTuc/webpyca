@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 :root[data-theme="dark"] {
     --bg-color: #1e1e1e;
@@ -50,7 +51,7 @@ body, html {
     left: 0;
     background-color: var(--bg-color);
     color: var(--text-color);
-    font-family: 'Fira Code', monospace;
+    font-family: 'Space Mono', monospace;
     overflow: hidden;
 }
 
@@ -89,12 +90,16 @@ body, html {
     direction: ltr;
 }
 
+.codemirror-editor {
+    font-family: 'Space Mono' monospace;    
+}
+
 .code-editor {
     flex: 1;
     background-color: var(--bg-color);
     color: var(--text-color);
     border: none;
-    font-family: 'Fira Code', monospace;
+    font-family: 'Space Mono', monospace;
     font-size: 14px;
     line-height: 1.6;
     padding: 15px;
@@ -120,7 +125,7 @@ body, html {
 .controls-container {
     position: fixed;
     left: 50%;
-    top: 3%;
+    top: 0%;
     transform: translate(-50%);
     background-color: transparent;
     padding: 0;
@@ -147,7 +152,7 @@ body, html {
     color: var(--text-color);
     border: 1px solid var(--text-color);
     padding: 4px 6px;
-    font-family: 'Fira Code', monospace;
+    font-family: 'Space Mono', monospace;
     font-size: 12px;
     cursor: pointer;
     border-radius: 0;
@@ -243,6 +248,13 @@ body, html {
 
 .cm-editor {
     transition: all var(--transition-duration) var(--transition-timing) !important;
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+}
+
+.cm-content {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
 }
 
 .cm-editor .cm-content {
@@ -279,7 +291,7 @@ body, html {
     color: var(--text-color);
     border: 1px solid var(--text-color);
     padding: 4px 6px;
-    font-family: 'Fira Code', monospace;
+    font-family: 'Space Mono', monospace;
     font-size: 12px;
     width: 40px;
     position: relative;
@@ -312,7 +324,7 @@ body, html {
     color: var(--text-color);
     border: 1px solid var(--text-color);
     padding: 4px 6px;
-    font-family: 'Fira Code', monospace;
+    font-family: 'Space Mono', monospace;
     font-size: 12px;
     position: relative;
     top: 70vh;
@@ -329,7 +341,7 @@ body, html {
     background-color: var(--bg-color);
     color: var(--text-color);
     padding: 8px;
-    font-family: 'Fira Code', monospace;
+    font-family: 'Space Mono', monospace;
     font-size: 12px;
 }
 
