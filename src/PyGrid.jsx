@@ -76,62 +76,59 @@ def spray(x, y):
 `
 
 function sketch(p, config, pyodideInstance) {
-    
-    let currentCells = [];
-    let canvasWidth = config.width;
-    let canvasHeight = config.height;
-    let cellSize = config.cellSize;
-
-    let tx = 0;
-    let ty = 0;
-    let sf = 1;
-
+    let grid = {
+        cells: [],
+        x: 0,
+        y: 0,
+        scale: 1,
+        cellSize: config.cellSize,
+        width: config.width,
+        height: config.height
+    };
 
     p.setup = function() {
-        p.createCanvas(canvasWidth, canvasHeight, p.P2D);
+        p.createCanvas(config.width, config.height, p.P2D);
         p.noLoop();
         p.pixelDensity(1);
         p.noSmooth();
     }
 
     p.updateConfig = function(newConfig) {
-        canvasWidth = newConfig.width;
-        canvasHeight = newConfig.height;
-        cellSize = newConfig.cellSize;
-    }
-
-    p.mousePressed = function() {
-        handleMouse();
+        grid.width = newConfig.width;
+        grid.height = newConfig.height;
+        grid.cellSize = newConfig.cellSize;
     }
 
     p.mouseDragged = function() {
-        handleMouse();
+        handleMouse()
+    }
+
+    p.mousePressed = function() {
+        handleMouse()
     }
 
     p.mouseWheel = function(e) {
-        const s = e.delta > 0 ? 1.05 : 0.95
-        sf = sf * s
-        tx = p.mouseX * (1-s) + tx * s;
-        ty = p.mouseY * (1-s) + ty * s;
-        p.redraw()
-        return false
+        const s = e.delta > 0 ? 1.05 : 0.95;
+        grid.scale *= s;
+        grid.x = p.mouseX * (1-s) + grid.x * s;
+        grid.y = p.mouseY * (1-s) + grid.y * s;
+        p.redraw();
+        return false;
     }
 
     function handleMouse() {
-        // Only register mouse input if coordinates are within canvas
-        if (p.mouseX >= 0 && p.mouseX < canvasWidth && 
-            p.mouseY >= 0 && p.mouseY < canvasHeight) {
-            const mouseX = Math.floor(p.mouseX / cellSize);
-            const mouseY = Math.floor(p.mouseY / cellSize);
+        if (p.mouseX >= 0 && p.mouseX < grid.width && 
+            p.mouseY >= 0 && p.mouseY < grid.height) {
+            // Convert mouse coordinates to grid coordinates accounting for transformation
+            const mouseX = Math.floor((p.mouseX - grid.x) / (grid.cellSize * grid.scale));
+            const mouseY = Math.floor((p.mouseY - grid.y) / (grid.cellSize * grid.scale));
             
-            // Call the Python handle_mouse function if it exists
             if (pyodideInstance) {
                 try {
                     pyodideInstance.runPython(`
                         if 'spray' in globals() and callable(spray):
                             spray(${mouseY}, ${mouseX})
                     `);
-                    console.log(mouseX, mouseY)
                 } catch (err) {
                     console.error("Failed to call spray:", err);
                 }
@@ -140,30 +137,44 @@ function sketch(p, config, pyodideInstance) {
     }
 
     p.draw = function() {
-
         p.background('#1e1e1e');
-        p.translate(tx, ty)
-        p.scale(sf)
         
-        if (!Array.isArray(currentCells)) return;
-        const rowCount = currentCells.length;
-    
+        if (!Array.isArray(grid.cells)) return;
+        const rowCount = grid.cells.length;
         if (rowCount === 0) return;
-        const colCount = currentCells[0].length;
+        const colCount = grid.cells[0].length;
 
         p.loadPixels();
-    
-        for (let i = 0; i < rowCount; i++) {
-            for (let j = 0; j < colCount; j++) {
-                const value = currentCells[i][j];
+        
+        // Calculate the visible region of the grid
+        const scaledCellSize = grid.cellSize * grid.scale;
+        const startX = Math.max(0, Math.floor(-grid.x / scaledCellSize));
+        const startY = Math.max(0, Math.floor(-grid.y / scaledCellSize));
+        const endX = Math.min(colCount, Math.ceil((grid.width - grid.x) / scaledCellSize));
+        const endY = Math.min(rowCount, Math.ceil((grid.height - grid.y) / scaledCellSize));
+
+        for (let i = startY; i < endY; i++) {
+            for (let j = startX; j < endX; j++) {
+                const value = grid.cells[i][j];
                 const color = Math.floor(255 * (1 - value));
                 
-                const x = j * cellSize;
-                const y = i * cellSize;
+                // Calculate screen coordinates
+                const screenX = Math.floor(j * scaledCellSize + grid.x);
+                const screenY = Math.floor(i * scaledCellSize + grid.y);
                 
-                for (let dy = 0; dy < cellSize; dy++) {
-                    for (let dx = 0; dx < cellSize; dx++) {
-                        const idx = 4 * ((y + dy) * canvasWidth + (x + dx));
+                // Draw scaled cell
+                const cellWidth = Math.ceil(scaledCellSize);
+                const cellHeight = Math.ceil(scaledCellSize);
+                
+                for (let dy = 0; dy < cellHeight; dy++) {
+                    const pixelY = screenY + dy;
+                    if (pixelY < 0 || pixelY >= grid.height) continue;
+                    
+                    for (let dx = 0; dx < cellWidth; dx++) {
+                        const pixelX = screenX + dx;
+                        if (pixelX < 0 || pixelX >= grid.width) continue;
+                        
+                        const idx = 4 * (pixelY * grid.width + pixelX);
                         p.pixels[idx] = color;     // R
                         p.pixels[idx + 1] = color; // G
                         p.pixels[idx + 2] = color; // B
@@ -177,8 +188,7 @@ function sketch(p, config, pyodideInstance) {
     }
 
     p.updateCells = function(newCells) {
-        const start = performance.now();
-        currentCells = newCells;
+        grid.cells = newCells;
         p.redraw();
     }
 
