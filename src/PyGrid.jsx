@@ -9,6 +9,7 @@ import { useTheme } from './components/ThemeProvider';
 import ThemeToggle from "./components/ThemeToggle";
 import RunButton from "./components/RunButton";
 import FPSInput from "./components/FPSInput";
+import saved_automata from "./SavedAutomata";
 
 const initialImports =  
 `
@@ -16,66 +17,7 @@ import numpy as np
 import time
 
 `
-const initialCode = 
-`class Automaton:
-
-    def __init__(self, size):
-        # Initialize with random binary state (0 or 1)
-        self.grid = np.random.choice([0, 1], size=(size, size), p=[0.85, 0.15])
-        self.radius = 12
-        self.density =  0.6
-    
-    def draw(self):
-        # Calculate the number of live neighbors for each cell using convolution
-        kernel = np.array([[1, 1, 1],
-                          [1, 0, 1],
-                          [1, 1, 1]])
-        
-        # Count neighbors using convolution with periodic boundaries
-        neighbors = sum(
-            np.roll(np.roll(self.grid, i, 0), j, 1) * kernel[i+1, j+1]
-            for i in [-1, 0, 1]
-            for j in [-1, 0, 1]
-            if not (i == 0 and j == 0)
-        )
-        
-        # Apply Conway's Game of Life rules:
-        # 1. Live cell with 2 or 3 neighbors survives
-        # 2. Dead cell with exactly 3 neighbors becomes alive
-        # 3. All other cells die or stay dead
-        self.grid = ((neighbors == 3) | (self.grid & (neighbors == 2))).astype(int)
-        
-        return self.grid
-      
-    def spray(self, x, y):
-        # Define the square region bounds with periodic boundary handling
-        size = self.grid.shape[0]
-        r = self.radius
-        
-        # Create a grid of coordinates relative to center
-        y_coords, x_coords = np.ogrid[-r:r+1, -r:r+1]
-        # Calculate distances from center for each point
-        distances = np.sqrt(x_coords**2 + y_coords**2)
-        # Create circular mask with random density
-        spray_pattern = (distances <= r) & (np.random.random((2*r + 1, 2*r + 1)) < self.density)
-        
-        # Apply spray pattern with periodic boundaries
-        for i in range(-r, r+1):
-            for j in range(-r, r+1):
-                if spray_pattern[i+r, j+r]:
-                    # Use modulo for periodic boundaries
-                    new_x = (x + i) % size
-                    new_y = (y + j) % size
-                    self.grid[new_x, new_y] = 1
-
-auto = Automaton(300)
-
-def main():
-    return auto.draw()
-
-def spray(x, y):
-    auto.spray(x, y)
-`
+const initialCode = saved_automata.lenia
 
 function sketch(p, config, pyodideInstance, theme) {
     
@@ -139,7 +81,7 @@ function sketch(p, config, pyodideInstance, theme) {
     p.mouseWheel = function(e) {
         if (p.mouseX >= 0 && p.mouseX < grid.width &&
             p.mouseY >= 0 && p.mouseY < grid.height) {
-                const s = e.delta > 0 ? 1.05 : 0.95;
+                const s = e.delta < 0 ? 1.05 : 0.95;
                 grid.scale *= s;
                 grid.x = p.mouseX * (1-s) + grid.x * s;
                 grid.y = p.mouseY * (1-s) + grid.y * s;
