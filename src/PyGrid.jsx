@@ -14,13 +14,9 @@ import numpy as np
 import time
 
 `
-const initialCode = `
+const initialCode = 
+`class Automaton:
 
-
-
-import numpy as np
-
-class Automaton:
     def __init__(self, size):
         # Initialize with random binary state (0 or 1)
         self.grid = np.random.choice([0, 1], size=(size, size), p=[0.85, 0.15])
@@ -77,8 +73,6 @@ def main():
 
 def spray(x, y):
     auto.spray(x, y)
-
-
 `
 
 function sketch(p, config, pyodideInstance) {
@@ -88,18 +82,16 @@ function sketch(p, config, pyodideInstance) {
     let canvasHeight = config.height;
     let cellSize = config.cellSize;
 
-    let cam;
-    let delta = 0.001;
+    let tx = 0;
+    let ty = 0;
+    let sf = 1;
+
 
     p.setup = function() {
         p.createCanvas(canvasWidth, canvasHeight, p.P2D);
         p.noLoop();
         p.pixelDensity(1);
         p.noSmooth();
-
-        // cam = p.createCamera();
-        // cam.setPosition(0,-300,300)
-        // cam.lookAt(0,0,0)
     }
 
     p.updateConfig = function(newConfig) {
@@ -116,6 +108,15 @@ function sketch(p, config, pyodideInstance) {
         handleMouse();
     }
 
+    p.mouseWheel = function(e) {
+        const s = e.delta > 0 ? 1.05 : 0.95
+        sf = sf * s
+        tx = p.mouseX * (1-s) + tx * s;
+        ty = p.mouseY * (1-s) + ty * s;
+        p.redraw()
+        return false
+    }
+
     function handleMouse() {
         // Only register mouse input if coordinates are within canvas
         if (p.mouseX >= 0 && p.mouseX < canvasWidth && 
@@ -125,7 +126,6 @@ function sketch(p, config, pyodideInstance) {
             
             // Call the Python handle_mouse function if it exists
             if (pyodideInstance) {
-                
                 try {
                     pyodideInstance.runPython(`
                         if 'spray' in globals() and callable(spray):
@@ -142,6 +142,8 @@ function sketch(p, config, pyodideInstance) {
     p.draw = function() {
 
         p.background('#1e1e1e');
+        p.translate(tx, ty)
+        p.scale(sf)
         
         if (!Array.isArray(currentCells)) return;
         const rowCount = currentCells.length;
@@ -178,8 +180,6 @@ function sketch(p, config, pyodideInstance) {
         const start = performance.now();
         currentCells = newCells;
         p.redraw();
-        // console.log(`P5 redraw time: ${(performance.now() - start).toFixed(2)}ms`);
-        // console.log(`Projected FPS : ${(1000/(performance.now() - start)).toFixed(2)} FPS`);
     }
 
     return p;
@@ -196,7 +196,6 @@ function PyGrid({ themes }) {
     const [imports, setImports] = useState(initialImports);
     const [code, setCode] = useState(initialCode);
     
-    // const [codeChanged, setCodeChanged] = useState(true);
     const [error, setError] = useState(null);
 
     const [canvasConfig, setCanvasConfig] = useState({
@@ -206,10 +205,6 @@ function PyGrid({ themes }) {
     });
 
     const [storedCode, setStoredCode] = useState("");
-
-    // useEffect(() => {
-    //     console.log(p5Instance)
-    // }, [p5Instance])
 
     const initializeSketch = useCallback((p) => {
         const instance = sketch(p, canvasConfig, pyodideInstance);
