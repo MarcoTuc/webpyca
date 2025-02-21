@@ -139,9 +139,6 @@ function sketch(p, config, pyodideInstance, theme, isRGB) {
         if (rowCount === 0) return;
         const colCount = grid.cells[0].length;
 
-        // console.log("Value type:", typeof grid.cells[0][0], 
-                    // grid.cells[0][0] instanceof Float64Array ? "Float32Array" : "number")
-
         // Clear the entire canvas with the appropriate background color
         p.loadPixels();
         const bg = theme === 'dark' ? darkBg : lightBg;
@@ -368,28 +365,63 @@ function PyGrid({ themes }) {
             
             // Timing measurements
             const pythonStart = performance.now();
-            const result = await pyodideInstance.runPythonAsync("main()");
+            
+            // Convert the numpy array to a contiguous float32 array in Python
+            await pyodideInstance.runPythonAsync(`
+                _result = main()
+                if isinstance(_result, np.ndarray):
+                    _result = _result.astype(np.float32).ravel()
+                else:
+                    _result = np.array(_result, dtype=np.float32).ravel()
+            `);
+            
+            // Get the flattened array directly as a TypedArray
+            const flatArray = pyodideInstance.globals.get('_result').toJs();
             const pythonEnd = performance.now();
             
             const conversionStart = performance.now();
-            const jsResult = result.toJs();
+            // Reshape the array back to the original dimensions
+            const size = Math.sqrt(flatArray.length / (isRGB ? 3 : 1));
+            const jsResult = [];
+            
+            if (isRGB) {
+                for (let i = 0; i < size; i++) {
+                    const row = [];
+                    for (let j = 0; j < size; j++) {
+                        const idx = (i * size + j) * 3;
+                        row.push([
+                            flatArray[idx],
+                            flatArray[idx + 1],
+                            flatArray[idx + 2]
+                        ]);
+                    }
+                    jsResult.push(row);
+                }
+            } else {
+                for (let i = 0; i < size; i++) {
+                    const row = [];
+                    for (let j = 0; j < size; j++) {
+                        row.push(flatArray[i * size + j]);
+                    }
+                    jsResult.push(row);
+                }
+            }
             const conversionEnd = performance.now();
             
-            if (Array.isArray(jsResult)) {       
-                const renderStart = performance.now();
-                p5Instance.updateCells(jsResult);
-                const renderEnd = performance.now();
-                
-                // Log timing results
-                console.log(`---------------------------------------------`)
-                console.log(`Python computation: ${(pythonEnd - pythonStart).toFixed(2)}ms`);
-                console.log(`Array conversion: ${(conversionEnd - conversionStart).toFixed(2)}ms`);
-                console.log(`Rendering: ${(renderEnd - renderStart).toFixed(2)}ms`);
-                console.log(`Total: ${(renderEnd - pythonStart).toFixed(2)}ms`);
-                
-            } else {
-                setError("main() must return an array");
-            }
+            // Clean up the temporary Python variable
+            pyodideInstance.runPython('del _result');
+            
+            const renderStart = performance.now();
+            p5Instance.updateCells(jsResult);
+            const renderEnd = performance.now();
+            
+            // Log timing results
+            console.log(`---------------------------------------------`);
+            console.log(`Python computation: ${(pythonEnd - pythonStart).toFixed(2)}ms`);
+            console.log(`Array conversion: ${(conversionEnd - conversionStart).toFixed(2)}ms`);
+            console.log(`Rendering: ${(renderEnd - renderStart).toFixed(2)}ms`);
+            console.log(`Total: ${(renderEnd - pythonStart).toFixed(2)}ms`);
+            
         } catch (err) {
             setError(err.message);
             setIsRunning(false);
