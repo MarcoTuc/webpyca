@@ -294,8 +294,10 @@ function PyGrid({ themes }) {
         let animationFrameId;
         const loop = () => {
             if (isRunning) {
-                runCode();
-                animationFrameId = requestAnimationFrame(loop);                
+                setTimeout(() => {
+                    runCode();
+                    animationFrameId = requestAnimationFrame(loop);                
+                }, 1000/2)                                
             }
         };
         if (isRunning) {
@@ -333,7 +335,8 @@ function PyGrid({ themes }) {
                 const result = await pyodideInstance.runPythonAsync("main()");
                 const jsResult = result.toJs();
                 
-                if (Array.isArray(jsResult)) {       
+                if (Array.isArray(jsResult)) {   
+                     
                     const receivedSize = jsResult.length;
                     const newSize = canvasConfig.width / receivedSize;
                     const newConfig = {
@@ -357,6 +360,7 @@ function PyGrid({ themes }) {
             const jsResult = result.toJs();
             
             if (Array.isArray(jsResult)) {       
+                console.log("received array from Python")   
                 p5Instance.updateCells(jsResult);
             } else {
                 setError("main() must return an array");
