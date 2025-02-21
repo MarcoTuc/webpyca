@@ -137,6 +137,7 @@ function sketch(p, config, pyodideInstance) {
     }
 
     p.draw = function() {
+        
         p.background('#1e1e1e');
         
         if (!Array.isArray(grid.cells)) return;
