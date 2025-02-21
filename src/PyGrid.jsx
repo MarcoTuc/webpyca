@@ -75,7 +75,8 @@ def spray(x, y):
     auto.spray(x, y)
 `
 
-function sketch(p, config, pyodideInstance) {
+function sketch(p, config, pyodideInstance, theme) {
+    
     let grid = {
         cells: [],
         x: 0,
@@ -108,12 +109,15 @@ function sketch(p, config, pyodideInstance) {
     }
 
     p.mouseWheel = function(e) {
-        const s = e.delta > 0 ? 1.05 : 0.95;
-        grid.scale *= s;
-        grid.x = p.mouseX * (1-s) + grid.x * s;
-        grid.y = p.mouseY * (1-s) + grid.y * s;
-        p.redraw();
-        return false;
+        if (p.mouseX >= 0 && p.mouseX < grid.width &&
+            p.mouseY >= 0 && p.mouseY < grid.height) {
+                const s = e.delta > 0 ? 1.05 : 0.95;
+                grid.scale *= s;
+                grid.x = p.mouseX * (1-s) + grid.x * s;
+                grid.y = p.mouseY * (1-s) + grid.y * s;
+                p.redraw();
+                return false;
+            }
     }
 
     function handleMouse() {
@@ -136,10 +140,14 @@ function sketch(p, config, pyodideInstance) {
         }
     }
 
+    p.updateTheme = function(newTheme) {
+        theme = newTheme
+    }
+
     p.draw = function() {
-        
-        p.background('#1e1e1e');
-        
+        const lightBg = { r: 0xF8, g: 0xF6, b: 0xF1 };  // #F8F6F1
+        const darkBg = { r: 0x1E, g: 0x1E, b: 0x1E };  // #1E1E1E
+
         if (!Array.isArray(grid.cells)) return;
         const rowCount = grid.cells.length;
         if (rowCount === 0) return;
@@ -157,7 +165,16 @@ function sketch(p, config, pyodideInstance) {
         for (let i = startY; i < endY; i++) {
             for (let j = startX; j < endX; j++) {
                 const value = grid.cells[i][j];
-                const color = Math.floor(255 * (1 - value));
+                // Interpolate between light and dark background colors
+                const r = theme === 'dark' 
+                    ? Math.floor(value * 255 + (1 - value) * darkBg.r)
+                    : Math.floor(value * darkBg.r + (1 - value) * lightBg.r);
+                const g = theme === 'dark'
+                    ? Math.floor(value * 255 + (1 - value) * darkBg.g)
+                    : Math.floor(value * darkBg.g + (1 - value) * lightBg.g);
+                const b = theme === 'dark'
+                    ? Math.floor(value * 255 + (1 - value) * darkBg.b)
+                    : Math.floor(value * darkBg.b + (1 - value) * lightBg.b);
                 
                 // Calculate screen coordinates
                 const screenX = Math.floor(j * scaledCellSize + grid.x);
@@ -176,9 +193,9 @@ function sketch(p, config, pyodideInstance) {
                         if (pixelX < 0 || pixelX >= grid.width) continue;
                         
                         const idx = 4 * (pixelY * grid.width + pixelX);
-                        p.pixels[idx] = color;     // R
-                        p.pixels[idx + 1] = color; // G
-                        p.pixels[idx + 2] = color; // B
+                        p.pixels[idx] = r;     // R
+                        p.pixels[idx + 1] = g; // G
+                        p.pixels[idx + 2] = b; // B
                         p.pixels[idx + 3] = 255;   // A
                     }
                 }
@@ -218,10 +235,17 @@ function PyGrid({ themes }) {
     const [storedCode, setStoredCode] = useState("");
 
     const initializeSketch = useCallback((p) => {
-        const instance = sketch(p, canvasConfig, pyodideInstance);
+        const instance = sketch(p, canvasConfig, pyodideInstance, theme);
         setP5Instance(instance);
         return instance;
     }, [pyodideInstance, canvasConfig]);
+
+    useEffect(() => {
+        if (p5Instance) {
+            p5Instance.updateTheme(theme)
+            p5Instance.redraw()
+        }
+    }, [theme])
 
     function codeUpdater(newCode) {
         setCode(newCode);

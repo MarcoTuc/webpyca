@@ -11,7 +11,7 @@
 }
 
 :root[data-theme="light"] {
-    --bg-color: #ffffff;
+    --bg-color: #F8F6F1;
     --text-color: #000;
     --border-color: #ddd;
     --hover-color: #f0f0f0;
@@ -218,9 +218,9 @@ body, html {
 }
 
 
-#pygrid-container canvas {
+/* #pygrid-container canvas {
     border: 1px solid var(--border-color);
-}
+} */
 
 .examples-section {
     border-top: 1px solid var(--border-color);
