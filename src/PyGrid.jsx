@@ -89,6 +89,11 @@ function sketch(p, config, pyodideInstance, theme) {
         height: config.height
     };
 
+    // Add these variables to track dragging
+    let isDragging = false;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
+
     p.setup = function() {
         p.createCanvas(config.width, config.height, p.P2D);
         p.noLoop();
@@ -103,11 +108,32 @@ function sketch(p, config, pyodideInstance, theme) {
     }
 
     p.mouseDragged = function() {
-        handleMouse()
+        if (p.keyIsDown(p.CONTROL)) {
+            // Handle dragging
+            const dx = p.mouseX - lastMouseX;
+            const dy = p.mouseY - lastMouseY;
+            grid.x += dx;
+            grid.y += dy;
+            lastMouseX = p.mouseX;
+            lastMouseY = p.mouseY;
+            p.redraw();
+        } else {
+            handleMouse()
+        }
     }
 
     p.mousePressed = function() {
-        handleMouse()
+        if (p.keyIsDown(p.CONTROL)) {
+            isDragging = true;
+            lastMouseX = p.mouseX;
+            lastMouseY = p.mouseY;
+        } else {
+            handleMouse()
+        }
+    }
+
+    p.mouseReleased = function() {
+        isDragging = false;
     }
 
     p.mouseWheel = function(e) {
