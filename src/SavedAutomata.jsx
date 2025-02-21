@@ -1,6 +1,7 @@
 const saved_automata = {
     gol: 
-    `class Automaton:
+    `
+class Automaton:
 
     def __init__(self, size):
         # Initialize with random binary state (0 or 1)
@@ -63,8 +64,8 @@ def spray(x, y):
 
     lenia: 
     `
-    
 class Automaton:
+
     def __init__(self, size):
         self.size = size
         # Initialize with random state between 0 and 1

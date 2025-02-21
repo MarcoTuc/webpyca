@@ -10,6 +10,7 @@ import ThemeToggle from "./components/ThemeToggle";
 import RunButton from "./components/RunButton";
 import FPSInput from "./components/FPSInput";
 import saved_automata from "./SavedAutomata";
+import AutomatonSelect from "./components/AutomatonSelect";
 
 const initialImports =  
 `
@@ -79,15 +80,25 @@ function sketch(p, config, pyodideInstance, theme) {
     }
 
     p.mouseWheel = function(e) {
-        if (p.mouseX >= 0 && p.mouseX < grid.width &&
-            p.mouseY >= 0 && p.mouseY < grid.height) {
-                const s = e.delta < 0 ? 1.05 : 0.95;
-                grid.scale *= s;
-                grid.x = p.mouseX * (1-s) + grid.x * s;
-                grid.y = p.mouseY * (1-s) + grid.y * s;
-                p.redraw();
-                return false;
-            }
+        // Get canvas element
+        const canvas = p.canvas;
+        const rect = canvas.getBoundingClientRect();
+        
+        // Check if mouse is over the canvas
+        const isOverCanvas = 
+            e.clientX >= rect.left && 
+            e.clientX <= rect.right && 
+            e.clientY >= rect.top && 
+            e.clientY <= rect.bottom;
+
+        if (isOverCanvas) {
+            const s = e.delta < 0 ? 1.05 : 0.95;
+            grid.scale *= s;
+            grid.x = p.mouseX * (1-s) + grid.x * s;
+            grid.y = p.mouseY * (1-s) + grid.y * s;
+            p.redraw();
+            return false; // Prevent default only when over canvas
+        }
     }
 
     function handleMouse() {
@@ -205,6 +216,7 @@ function PyGrid({ themes }) {
     const [code, setCode] = useState(initialCode);
     
     const [error, setError] = useState(null);
+    const [automatonType, setAutomatonType] = useState('lenia');
 
     const [canvasConfig, setCanvasConfig] = useState({
         width: 600,
@@ -214,7 +226,7 @@ function PyGrid({ themes }) {
 
     const [storedCode, setStoredCode] = useState("");
 
-    const [FPS, setFPS] = useState(10)
+    const [FPS, setFPS] = useState(30)
 
     const initializeSketch = useCallback((p) => {
         const instance = sketch(p, canvasConfig, pyodideInstance, theme);
@@ -350,6 +362,11 @@ function PyGrid({ themes }) {
         }
     };
 
+    useEffect(() => {
+        setCode(saved_automata[automatonType]);
+        setIsRunning(false);
+    }, [automatonType]);
+
     return (
         <div className="ascii-play-container">
             <div className="left-panel">
@@ -368,7 +385,7 @@ function PyGrid({ themes }) {
                 </div>
                     <div className="controls-container">
                         <div id="separatrix" />
-                        <ThemeToggle />
+                        <ThemeToggle />                        
                         <RunButton
                             isLoading={isLoading}
                             isRunning={isRunning}
@@ -376,7 +393,11 @@ function PyGrid({ themes }) {
                         />
                         <FPSInput 
                             onChange={setFPS}
-                        />          
+                        />
+                        <AutomatonSelect 
+                            value={automatonType}
+                            onChange={setAutomatonType}
+                        />
                     </div>
             </div>
             <div className="right-panel">

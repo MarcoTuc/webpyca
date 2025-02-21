@@ -236,23 +236,6 @@ body, html {
     height: 100% !important;
 }
 
-.examples-section {
-    border-top: 1px solid var(--border-color);
-}
-
-/* .example-list {
-    padding: 10px 0;
-}
-
-.example-item {
-    padding: 8px 20px;
-    cursor: pointer;
-}
-
-.example-item:hover {
-    background-color: var(--hover-color);
-} */
-
 /* Adjust P5 canvas background */
 .P5Canvas {
     background-color: var(--bg-color) !important;
@@ -322,4 +305,48 @@ body, html {
 
 .fps-input[type=number] {
     -moz-appearance: textfield;
+}
+
+.automaton-select {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
+    padding: 4px 6px;
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    position: relative;
+    top: 70vh;
+    width: 80px;
+    text-align: center;
+    cursor: pointer;
+    appearance: none;
+    border-radius: 0;
+    outline: none;
+}
+
+/* Update the option styles */
+.automaton-select option {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    padding: 8px;
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+}
+
+/* Add styles for when select is opened */
+.automaton-select:focus {
+    background-color: var(--hover-color);
+    direction: rtl;
+}
+
+.automaton-select:focus option {
+    direction: ltr;
+    background-color: var(--bg-color);
+}
+
+/* Add hover state for options */
+.automaton-select option:hover,
+.automaton-select option:focus,
+.automaton-select option:checked {
+    background-color: var(--hover-color);
 }

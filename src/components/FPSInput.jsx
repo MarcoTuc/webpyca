@@ -10,7 +10,7 @@ function FPSInput({ onChange }) {
             type="number"
             min="1"
             max="60"
-            defaultValue="10"
+            defaultValue="30"
             onBlur={handleChange}
             onKeyDown={(e) => {
                 if (e.key === 'Enter') {
