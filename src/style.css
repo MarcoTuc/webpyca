@@ -153,6 +153,7 @@ body, html {
     border-radius: 0;
     position: relative;
     top: 50px;
+    width: 40px;
     text-align: center;
 }
 
@@ -275,4 +276,37 @@ body, html {
 .cm-editor .cm-content,
 .cm-editor .cm-gutters {
     transition: all var(--transition-duration) var(--transition-timing) !important;
+}
+
+.fps-input {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
+    padding: 4px 6px;
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    width: 40px;
+    position: relative;
+    top: 50px;
+    text-align: center;
+}
+
+.fps-input:hover {
+    background-color: var(--hover-color);
+}
+
+.fps-input:focus {
+    outline: none;
+    border-color: var(--text-color);
+}
+
+/* Remove spinner arrows from number input */
+.fps-input::-webkit-inner-spin-button,
+.fps-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.fps-input[type=number] {
+    -moz-appearance: textfield;
 }

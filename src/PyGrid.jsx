@@ -7,6 +7,8 @@ import { python } from '@codemirror/lang-python'
 import P5Wrapper from "./components/P5Wrapper";
 import { useTheme } from './components/ThemeProvider';
 import ThemeToggle from "./components/ThemeToggle";
+import RunButton from "./components/RunButton";
+import FPSInput from "./components/FPSInput";
 
 const initialImports =  
 `
@@ -223,6 +225,7 @@ function sketch(p, config, pyodideInstance, theme) {
 }
 
 function PyGrid({ themes }) {
+
     const { theme } = useTheme();
     const [pyodideInstance, setPyodideInstance] = useState(null);
     const [p5Instance, setP5Instance] = useState(null);
@@ -242,6 +245,8 @@ function PyGrid({ themes }) {
     });
 
     const [storedCode, setStoredCode] = useState("");
+
+    const [FPS, setFPS] = useState(10)
 
     const initializeSketch = useCallback((p) => {
         const instance = sketch(p, canvasConfig, pyodideInstance, theme);
@@ -291,24 +296,20 @@ function PyGrid({ themes }) {
     }, []);
 
     useEffect(() => {
-        let animationFrameId;
-        const loop = () => {
-            if (isRunning) {
-                setTimeout(() => {
-                    runCode();
-                    animationFrameId = requestAnimationFrame(loop);                
-                }, 1000/2)                                
-            }
-        };
+        let intervalId;
+        
         if (isRunning) {
-            loop();
+            intervalId = setInterval(async () => {
+                await Promise.resolve(runCode());
+            }, 1000/FPS); // 2 FPS
         }
+
         return () => {
-            if (animationFrameId) {
-                cancelAnimationFrame(animationFrameId);
+            if (intervalId) {
+                clearInterval(intervalId);
             }
         };
-    }, [isRunning]);
+    }, [isRunning, FPS]);
 
     const runCode = async () => {
 
@@ -400,14 +401,14 @@ function PyGrid({ themes }) {
                     <div className="controls-container">
                         <div id="separatrix" />
                         <ThemeToggle />
-                        <button 
-                            className={`run-button ${isLoading ? 'loading' : ''}`}
+                        <RunButton
+                            isLoading={isLoading}
+                            isRunning={isRunning}
                             onClick={handleRunClick}
-                            disabled={isLoading}
-                        >
-                            {isLoading ? 'Loading...' : isRunning ? 'Stop' : 'Run'}
-                        </button>
-                        
+                        />
+                        <FPSInput 
+                            onChange={setFPS}
+                        />          
                     </div>
             </div>
             <div className="right-panel">
