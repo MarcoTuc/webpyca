@@ -277,8 +277,15 @@ function PyGrid({ themes }) {
                 });
                 
                 await pyodide.loadPackage("micropip");
-                const micropip = await pyodide.pyimport("micropip");
-                await micropip.install("numpy");
+                // const micropip = await pyodide.pyimport("micropip");
+                // await micropip.install("numpy");
+                // await micropip.install("scipy");
+                // await micropip.install(`${window.location.origin}/jax-0.5.1.dev20250221+c664a0cd4-py3-none-any.whl`);
+                await pyodide.runPython(`
+                    import micropip
+                    micropip.install("numpy")
+                    micropip.install("scipy")
+                    `)
                 // import standard packages when initializing the engine
                 await pyodide.runPython(imports)
                 

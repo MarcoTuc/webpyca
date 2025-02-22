@@ -6,3 +6,4 @@
 
 - check with Vass the RGB Lenia implementation, because it looks strange. Why is there a top-left directional drift always? 
 
+- make brush radius and brush density two input parameters so we can control them from javascript and have them interactive and interchangeable while the simulation is moving on 

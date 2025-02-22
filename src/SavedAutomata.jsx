@@ -65,6 +65,7 @@ def spray(x, y):
 
     lenia: 
     `
+
 #### ONE CHANNEL LENIA
 #### marco.tuccio95@gmail.com
 
@@ -87,12 +88,12 @@ class Automaton:
             size=(size, size), 
             p=[0.9, 0.1]
         )
-        self.radius = 12
+        self.radius = 24
         self.density = 0.6
         
-        self.dt = 0.1
-        self.R = 13
-        self.T = 0.15
+        self.dt = 0.02
+        self.R = 14
+        self.T = 0.18
         self.sigma = 0.015
         
         self.kernel = self._create_kernel()
@@ -137,14 +138,15 @@ class Automaton:
             spray_pattern, 1, self.grid[x_indices, y_indices]
         )
 
-auto = Automaton(300)
+auto = Automaton(500)
 
 def main():
-  return auto.draw()
+    return auto.draw()
 
 def spray(x, y):
-  auto.spray(x, y)
-   
+    auto.spray(x, y)
+    
+    
     `,
     multilenia:
     `
