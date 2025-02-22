@@ -138,7 +138,7 @@ class Automaton:
             spray_pattern, 1, self.grid[x_indices, y_indices]
         )
 
-auto = Automaton(500)
+auto = Automaton(300)
 
 def main():
     return auto.draw()
