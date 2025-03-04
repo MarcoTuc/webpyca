@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import './style.css'
 import PyGrid from './PyGrid'
+import TorchGrid from './TorchGrid';
 import { ThemeProvider } from './components/ThemeProvider'
 import ThemeToggle from './components/ThemeToggle'
 import { atomone } from '@uiw/codemirror-theme-atomone'
