@@ -1,14 +1,19 @@
 import React from "react";
+import Tooltip from "./Tooltip";
 
 function RunButton( { isLoading, isRunning, onClick } ) {
     return (
-        <button 
-            className={`run-button ${isLoading ? 'loading' : ''}`}
-            onClick={onClick}
-            disabled={isLoading}
+        <Tooltip 
+            content={isLoading ? "Loading Pyodide..." : isRunning ? "Stop simulation" : "Run simulation"}
         >
-            {isLoading ? 'Loading...' : isRunning ? 'Stop' : 'Run'}
-        </button>
+            <button 
+                className={`run-button ${isLoading ? 'loading' : ''}`}
+                onClick={onClick}
+                disabled={isLoading}
+            >
+                {isLoading ? 'Loading...' : isRunning ? 'Stop' : 'Run'}
+            </button>
+        </Tooltip>
     )
 }
 

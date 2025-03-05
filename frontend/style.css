@@ -35,6 +35,19 @@
     transition: all var(--transition-duration) var(--transition-timing) !important;
 }
 
+/* Add this to prevent transitions on Tippy elements */
+.tippy-box, 
+.tippy-content,
+.tippy-arrow,
+[data-tippy-root] {
+    transition: opacity var(--transition-duration) var(--transition-timing) !important;
+}
+
+/* Complete the fade animation */
+.tippy-box[data-animation='fade'][data-state='hidden'] {
+    opacity: 0;
+}
+
 body, html {
     margin: 0;
     padding: 0;
@@ -326,8 +339,8 @@ body, html {
     padding: 4px 6px;
     font-family: 'Space Mono', monospace;
     font-size: 12px;
-    position: relative;
-    top: 80vh;
+    position: absolute;
+    top: 93vh;
     width: 80px;
     transform: translate(-5vw);
     text-align: center;
@@ -389,3 +402,38 @@ body, html {
 .reinitialize-button:disabled {
     cursor: not-allowed;
 }
+
+/* Tooltip styles */
+.tippy-box {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    padding: 4px 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 1500 !important;
+  }
+  
+  .tippy-box[data-theme='dark'] {
+    background-color: #1e1e1e;
+    color: #fff;
+    border-color: #333;
+  }
+  
+  .tippy-box[data-theme='light'] {
+    background-color: #F8F6F1;
+    color: #000;
+    border-color: #ddd;
+  }
+  
+  /* Fade animation */
+  .tippy-box[data-animation='fade'][data-state='hidden'] {
+    opacity: 0;
+  }
+  
+  /* Ensure tooltips don't interfere with other elements */
+  .tippy-popper {
+    pointer-events: none;
+  }
