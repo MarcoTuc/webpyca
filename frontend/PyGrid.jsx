@@ -359,51 +359,51 @@ function PyGrid({ themes }) {
         if (!pyodideInstance || !p5Instance) return;
         
         try {
-            // setError(null);
+            setError(null);
             
-            // // Check if code has changed from stored version
-            // if (code !== storedCode) {
-            //     await pyodideInstance.runPythonAsync(code);
+            // Check if code has changed from stored version
+            if (code !== storedCode) {
+                await pyodideInstance.runPythonAsync(code);
                 
-            //     const hasMainFunction = await pyodideInstance.runPythonAsync(`
-            //         'main' in globals() and callable(globals()['main'])
-            //     `);
+                const hasMainFunction = await pyodideInstance.runPythonAsync(`
+                    'main' in globals() and callable(globals()['main'])
+                `);
                 
-            //     if (!hasMainFunction) {
-            //         setError("No main() function defined");
-            //         return;
-            //     }
+                if (!hasMainFunction) {
+                    setError("No main() function defined");
+                    return;
+                }
 
-            //     // Run one step to get dimensions
-            //     const result = await pyodideInstance.runPythonAsync("main()");
-            //     const jsResult = result.toJs();
+                // Run one step to get dimensions
+                const result = await pyodideInstance.runPythonAsync("main()");
+                const jsResult = result.toJs();
                 
-            //     if (Array.isArray(jsResult)) {   
+                if (Array.isArray(jsResult)) {   
                      
-            //         const receivedSize = jsResult.length;
-            //         const newSize = canvasConfig.width / receivedSize;
-            //         const newConfig = {
-            //             ...canvasConfig,
-            //             cellSize: newSize
-            //         };
+                    const receivedSize = jsResult.length;
+                    const newSize = canvasConfig.width / receivedSize;
+                    const newConfig = {
+                        ...canvasConfig,
+                        cellSize: newSize
+                    };
 
-            //         setCanvasConfig(newConfig);
-            //         p5Instance.updateConfig(newConfig);
+                    setCanvasConfig(newConfig);
+                    p5Instance.updateConfig(newConfig);
 
-            //         if (typeof jsResult[0][0] === 'number') {
-            //             setIsRGB(false)
-            //         } else {
-            //             setIsRGB(true)
-            //         }
+                    if (typeof jsResult[0][0] === 'number') {
+                        setIsRGB(false)
+                    } else {
+                        setIsRGB(true)
+                    }
                     
-            //         // Store the new code and reinitialize
-            //         setStoredCode(code);
-            //         await pyodideInstance.runPythonAsync(code);
-            //     } else {
-            //         setError("main() must return an array");
-            //         return;
-            //     }
-            // }
+                    // Store the new code and reinitialize
+                    setStoredCode(code);
+                    await pyodideInstance.runPythonAsync(code);
+                } else {
+                    setError("main() must return an array");
+                    return;
+                }
+            }
             
             // Timing measurements
             const pythonStart = performance.now();
