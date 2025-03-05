@@ -11,6 +11,7 @@ import RunButton from "./components/RunButton";
 import FPSInput from "./components/FPSInput";
 import saved_automata from "./SavedAutomata";
 import AutomatonSelect from "./components/AutomatonSelect";
+import ReinitializeButton from "./components/ReinitializeButton";
 
 const initialImports =  
 `
@@ -277,10 +278,6 @@ function PyGrid({ themes }) {
                 });
                 
                 await pyodide.loadPackage("micropip");
-                // const micropip = await pyodide.pyimport("micropip");
-                // await micropip.install("numpy");
-                // await micropip.install("scipy");
-                // await micropip.install(`${window.location.origin}/jax-0.5.1.dev20250221+c664a0cd4-py3-none-any.whl`);
                 await pyodide.runPython(`
                     import micropip
                     micropip.install("numpy")
@@ -320,55 +317,93 @@ function PyGrid({ themes }) {
         };
     }, [isRunning, FPS]);
 
+    async function checkCode(code) {
+        const hasMainFunction = await pyodideInstance.runPythonAsync(`
+            'main' in globals() and callable(globals()['main'])
+        `);
+        
+        if (!hasMainFunction) {
+            setError("No main() function defined");
+            return false;
+        }
+
+        // Run one step to get dimensions
+        const result = await pyodideInstance.runPythonAsync("main()");
+        const jsResult = result.toJs();
+        
+        if (Array.isArray(jsResult)) {   
+            const receivedSize = jsResult.length;
+            const newSize = canvasConfig.width / receivedSize;
+            const newConfig = {
+                ...canvasConfig,
+                cellSize: newSize
+            };
+            
+            setCanvasConfig(newConfig);
+            p5Instance.updateConfig(newConfig);
+
+            if (typeof jsResult[0][0] === 'number') {
+                setIsRGB(false)
+            } else {
+                setIsRGB(true)
+            }
+            
+            // Store the new code and reinitialize
+            setStoredCode(code);
+            return jsResult; // Return the result directly
+        }
+        return false;
+    }
+
     const runCode = async () => {
         if (!pyodideInstance || !p5Instance) return;
         
         try {
-            setError(null);
+            // setError(null);
             
-            // Check if code has changed from stored version
-            if (code !== storedCode) {
-                // Run one step to get canvas size
-                await pyodideInstance.runPythonAsync(code);
+            // // Check if code has changed from stored version
+            // if (code !== storedCode) {
+            //     await pyodideInstance.runPythonAsync(code);
                 
-                const hasMainFunction = await pyodideInstance.runPythonAsync(`
-                    'main' in globals() and callable(globals()['main'])
-                `);
+            //     const hasMainFunction = await pyodideInstance.runPythonAsync(`
+            //         'main' in globals() and callable(globals()['main'])
+            //     `);
                 
-                if (!hasMainFunction) {
-                    setError("No main() function defined");
-                    return;
-                }
+            //     if (!hasMainFunction) {
+            //         setError("No main() function defined");
+            //         return;
+            //     }
 
-                // Run one step to get dimensions
-                const result = await pyodideInstance.runPythonAsync("main()");
-                const jsResult = result.toJs();
+            //     // Run one step to get dimensions
+            //     const result = await pyodideInstance.runPythonAsync("main()");
+            //     const jsResult = result.toJs();
                 
-                if (Array.isArray(jsResult)) {   
+            //     if (Array.isArray(jsResult)) {   
                      
-                    const receivedSize = jsResult.length;
-                    const newSize = canvasConfig.width / receivedSize;
-                    const newConfig = {
-                        ...canvasConfig,
-                        cellSize: newSize
-                    };
-                    setCanvasConfig(newConfig);
-                    p5Instance.updateConfig(newConfig);
+            //         const receivedSize = jsResult.length;
+            //         const newSize = canvasConfig.width / receivedSize;
+            //         const newConfig = {
+            //             ...canvasConfig,
+            //             cellSize: newSize
+            //         };
 
-                    if (typeof jsResult[0][0] === 'number') {
-                        setIsRGB(false)
-                    } else {
-                        setIsRGB(true)
-                    }
+            //         setCanvasConfig(newConfig);
+            //         p5Instance.updateConfig(newConfig);
+
+            //         if (typeof jsResult[0][0] === 'number') {
+            //             setIsRGB(false)
+            //         } else {
+            //             setIsRGB(true)
+            //         }
                     
-                    // Store the new code and reinitialize
-                    setStoredCode(code);
-                    await pyodideInstance.runPythonAsync(code);
-                } else {
-                    setError("main() must return an array");
-                    return;
-                }
-            }
+            //         // Store the new code and reinitialize
+            //         setStoredCode(code);
+            //         await pyodideInstance.runPythonAsync(code);
+            //     } else {
+            //         setError("main() must return an array");
+            //         return;
+            //     }
+            // }
             
             // Timing measurements
             const pythonStart = performance.now();
@@ -435,7 +470,7 @@ function PyGrid({ themes }) {
         }
     };
 
-    const handleRunClick = (e) => {
+    const handleRunClick = () => {
         if (!isRunning) {
             runCode().then(() => {
                 if (!error) setIsRunning(true);
@@ -445,9 +480,110 @@ function PyGrid({ themes }) {
         }
     };
 
+    const handleReinitialize = async () => {
+        const wasRunning = isRunning;
+        setIsRunning(false); // Stop any running intervals
+        setError(null);
+        
+        try {
+            // Reset pyodide state by re-evaluating the imports and code
+            await pyodideInstance.runPythonAsync(imports);
+            await pyodideInstance.runPythonAsync(code);
+            
+            // Check if the main function exists
+            const hasMainFunction = await pyodideInstance.runPythonAsync(`
+                'main' in globals() and callable(globals()['main'])
+            `);
+            
+            if (!hasMainFunction) {
+                setError("No main() function defined");
+                return;
+            }
+            
+            // Run main() once to get the initial state and detect changes needed
+            const result = await pyodideInstance.runPythonAsync("main()");
+            const jsResult = result.toJs();
+            
+            if (!Array.isArray(jsResult)) {
+                setError("main() must return an array");
+                return;
+            }
+            
+            // Update canvas configuration directly if code has changed
+            if (code !== storedCode) {
+                const receivedSize = jsResult.length;
+                const newSize = canvasConfig.width / receivedSize;
+                const newConfig = {
+                    ...canvasConfig,
+                    cellSize: newSize
+                };
+                
+                // Update configuration before rendering
+                setCanvasConfig(newConfig);
+                p5Instance.updateConfig(newConfig);
+                
+                // Detect RGB mode
+                const isRGBMode = typeof jsResult[0][0] !== 'number';
+                setIsRGB(isRGBMode);
+                p5Instance.updateRGB(isRGBMode);
+                
+                // Store the code for future reference
+                setStoredCode(code);
+            }
+            
+            // Reset any internal state in pyodide if needed
+            await pyodideInstance.runPythonAsync(`
+                # Reset any global variables that might be maintaining state
+                if 'reset' in globals() and callable(globals()['reset']):
+                    reset()
+            `);
+            
+            // Get a fresh state after reset
+            const freshResult = await pyodideInstance.runPythonAsync("main()");
+            const freshState = freshResult.toJs();
+            
+            // Update the p5 instance with the fresh state
+            p5Instance.updateCells(freshState);
+            
+            // Simulate a single step of the simulation after a short delay
+            setTimeout(async () => {
+                if (pyodideInstance) {
+                    try {
+                        const stepResult = await pyodideInstance.runPythonAsync("main()");
+                        p5Instance.updateCells(stepResult.toJs());
+                        
+                        // Restore the previous running state if it was running
+                        if (wasRunning) {
+                            setIsRunning(true);
+                        }
+                    } catch (stepErr) {
+                        console.error("Error in simulation step:", stepErr);
+                    }
+                }
+            }, 50);
+            
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
+    function clearCanvas() {
+        const size = Math.floor(canvasConfig.width / canvasConfig.cellSize);
+        const emptyGrid = Array(size).fill().map(() => 
+            isRGB 
+                ? Array(size).fill().map(() => [0, 0, 0]) 
+                : Array(size).fill(0)
+        );
+        
+        p5Instance.updateCells(emptyGrid);
+    };
+
     useEffect(() => {
         setCode(saved_automata[automatonType]);
         setIsRunning(false);
+        if (p5Instance) {
+            clearCanvas();
+        }
     }, [automatonType]);
 
     return (
@@ -486,6 +622,10 @@ function PyGrid({ themes }) {
                             isLoading={isLoading}
                             isRunning={isRunning}
                             onClick={handleRunClick}
+                        />
+                        <ReinitializeButton 
+                            onClick={handleReinitialize}
+                            disabled={isLoading}
                         />
                         <FPSInput 
                             onChange={setFPS}

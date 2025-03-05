@@ -364,3 +364,28 @@ body, html {
 .automaton-select option:checked {
     background-color: var(--hover-color);
 }
+
+
+.reinitialize-button {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
+    padding: 4px 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 0;
+    position: relative;
+    top: 50px;
+    width: 40px;
+    text-align: center;
+}
+
+.reinitialize-button:hover:not(:disabled) {
+    background-color: var(--hover-color);
+    border-color: var(--text-color);
+}
+
+.reinitialize-button:disabled {
+    cursor: not-allowed;
+}
