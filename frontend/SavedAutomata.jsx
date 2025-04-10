@@ -251,10 +251,10 @@ def spray(x, y):
 
 
 
-    # ONE CHANNEL LENIA IMPLEMENTATION
-    # Based on BatchLenia with parameters from read_data.py
+# ONE CHANNEL LENIA IMPLEMENTATION
+# Based on BatchLenia with parameters from read_data.py
     
-    import numpy as np
+import numpy as np
 from scipy.fft import fft2, ifft2
 
 
