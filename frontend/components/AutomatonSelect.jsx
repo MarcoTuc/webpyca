@@ -92,6 +92,7 @@ function AutomatonSelect({ value, onChange }) {
           <StyledMenuItem value="lenia">Lenia</StyledMenuItem>
           <StyledMenuItem value="multilenia">RGB Lenia</StyledMenuItem>
           <StyledMenuItem value="gol">Game of Life</StyledMenuItem>
+          <StyledMenuItem value="baralenia">Bara lenia</StyledMenuItem>
         </StyledSelect>
       </StyledFormControl>
     </Tooltip>

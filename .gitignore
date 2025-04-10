@@ -1,4 +1,5 @@
 node_modules
 .old-src
 .trash
+.lab
 env
